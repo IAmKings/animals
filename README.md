@@ -39,6 +39,14 @@
 ### 首次克隆需要执行一次
 
 ```bash
+bash scripts/setup.sh
+```
+
+这个脚本会启用钩子、自检钩子是否真的生效、校验 `icons/index.json` 与目录一致、检查 PNG 渲染器，最后打印一份汇总。重复执行安全。
+
+如果只想配钩子、不做其他检查，等价的手动命令是：
+
+```bash
 git config core.hooksPath .githooks
 ```
 
