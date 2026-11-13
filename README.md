@@ -53,3 +53,19 @@ git commit --no-verify -m "提交信息"
 ```
 
 跳过的是钩子，不是规范——提交信息仍应使用中文。
+
+## 图标素材
+
+`icons/` 下 17 个目录，每个目录 6 个 SVG。**SVG 是唯一源文件。**
+
+PNG 属于派生产物，**不纳入版本控制**（已在 `.gitignore` 中排除 `icons/**/*.png`）。需要时运行脚本生成：
+
+```bash
+scripts/export-png.sh              # 全部导出，长边 1024px
+scripts/export-png.sh 512          # 指定长边尺寸
+scripts/export-png.sh 1024 03-cow  # 只导出某个目录
+```
+
+默认用 ImageMagick 内置渲染器，足以应付单路径图标；若安装了 `rsvg-convert` 会自动优先使用。SVG 含渐变、滤镜、遮罩等复杂特性时，请先 `brew install librsvg`，否则内置渲染器会失真。
+
+`styles/` 下的 4 张 JPG 是展示材料，不是派生产物，正常随仓库保存。
