@@ -11,6 +11,7 @@
 #   - 文件名不符合 <目录名>-两位序号.svg
 #   - 文件名前缀与所在目录名不一致
 #   - 同一目录内序号重复
+#   - 同一目录内序号不连续（必须从 01 排到 N）
 #   - 目录内混入子目录，或未被 .gitignore 忽略的非 SVG 文件
 #
 # 隐藏文件（.DS_Store 等）和 .gitignore 忽略的文件（导出的 PNG 等）
@@ -107,6 +108,7 @@ ignored = git_ignored([full for _, _, full in candidates])
 FILE_PATTERN = re.compile(r"(.+)-(\d{2})\.svg")
 total_files = 0
 seen_numbers = {}
+numbers_by_dir = {}
 
 for name, entry, full in candidates:
     if full in ignored:
@@ -136,6 +138,16 @@ for name, entry, full in candidates:
         )
     else:
         seen_numbers[key] = entry
+    numbers_by_dir.setdefault(name, set()).add(int(number))
+
+# 序号必须从 01 连续排到 N，中间不留空档
+for name in sorted(numbers_by_dir):
+    actual = numbers_by_dir[name]
+    expected = set(range(1, len(actual) + 1))
+    gaps = sorted(expected - actual)
+    if gaps:
+        missing = "、".join(f"{n:02d}" for n in gaps)
+        problems.append(f"{name} 目录内序号不连续，缺少 {missing}")
 
 if problems:
     print(f"✖ 图标素材校验未通过（{len(problems)} 处问题）：", file=sys.stderr)
