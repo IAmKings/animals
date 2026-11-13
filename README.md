@@ -1,5 +1,7 @@
 # animals
 
+[![校验](https://github.com/IAmKings/animals/actions/workflows/check.yml/badge.svg)](https://github.com/IAmKings/animals/actions/workflows/check.yml)
+
 ## 提交规范
 
 本项目**所有 commit 提交信息必须使用中文**。
@@ -65,7 +67,27 @@ git config core.hooksPath .githooks
 git commit --no-verify -m "提交信息"
 ```
 
-跳过的是钩子，不是规范——提交信息仍应使用中文。
+跳过的是钩子，不是规范——提交信息仍应使用中文。钩子可以被绕过，CI 会在推送时做同样的检查。
+
+## 持续集成
+
+推送到 `main` 或提 PR 时，GitHub Actions 会执行 [`.github/workflows/check.yml`](.github/workflows/check.yml)，依次跑：
+
+| 步骤 | 脚本 | 失败条件 |
+| --- | --- | --- |
+| 环境配置与钩子自检 | `scripts/setup.sh` | 钩子无法启用或自检不通过 |
+| 素材索引校验 | `scripts/check-index.sh` | `icons/index.json` 与磁盘目录不一致 |
+| 提交信息校验 | `scripts/check-commits.sh` | 本次推送的提交信息不含中文 |
+
+三个脚本都能在本地单独运行，推送前先跑一遍可以省一次往返：
+
+```bash
+bash scripts/setup.sh
+bash scripts/check-index.sh
+bash scripts/check-commits.sh origin/main..HEAD
+```
+
+合并提交（有多个父提交）会被跳过，因为 git 自动生成的信息无法改写。
 
 ## 图标素材
 

@@ -1,0 +1,48 @@
+name: 校验
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: check-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: 环境与素材校验
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+        with:
+          # 提交信息校验需要完整历史
+          fetch-depth: 0
+
+      - name: 配置环境并自检
+        run: bash scripts/setup.sh
+
+      - name: 校验 icons/index.json
+        run: bash scripts/check-index.sh
+
+      - name: 校验提交信息为中文
+        run: |
+          set -euo pipefail
+
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            RANGE="${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }}"
+          elif [[ "${{ github.event.before }}" =~ ^0+$ ]]; then
+            # 新分支首次推送，没有可比较的起点，只检查最新一条
+            RANGE="HEAD~1..HEAD"
+          else
+            RANGE="${{ github.event.before }}..${{ github.event.after }}"
+          fi
+
+          echo "检查区间：$RANGE"
+          bash scripts/check-commits.sh "$RANGE"

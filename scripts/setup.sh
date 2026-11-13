@@ -85,53 +85,16 @@ else
 fi
 
 # --- 4. 校验 index.json -------------------------------------------------
-if ! command -v python3 >/dev/null 2>&1; then
-    warn "未找到 python3，跳过 index.json 校验"
-    WARNINGS=$((WARNINGS + 1))
-elif [ ! -f icons/index.json ]; then
-    warn "未找到 icons/index.json，跳过校验"
-    WARNINGS=$((WARNINGS + 1))
+set +e
+INDEX_OUT=$(bash scripts/check-index.sh 2>&1)
+CHECK_RC=$?
+set -e
+if [ "$CHECK_RC" -eq 0 ]; then
+    ok "$(printf '%s' "$INDEX_OUT" | sed 's/^✔ //')"
 else
-    set +e
-    python3 - icons/index.json icons <<'PY'
-import json
-import os
-import sys
-
-index_path, src = sys.argv[1], sys.argv[2]
-try:
-    with open(index_path, encoding="utf-8") as fh:
-        order = json.load(fh)
-except Exception as exc:  # noqa: BLE001
-    print(f"icons/index.json 解析失败：{exc}")
-    sys.exit(1)
-
-if not isinstance(order, list) or not all(isinstance(x, str) for x in order):
-    print("icons/index.json 必须是字符串数组")
-    sys.exit(1)
-
-disk = sorted(d for d in os.listdir(src) if os.path.isdir(os.path.join(src, d)))
-dupes = sorted({x for x in order if order.count(x) > 1})
-missing = [x for x in disk if x not in order]
-stale = [x for x in order if x not in disk]
-
-if missing:
-    print("磁盘有但 index 未收录：" + "、".join(missing))
-if stale:
-    print("index 有但磁盘不存在：" + "、".join(stale))
-if dupes:
-    print("index 中重复出现：" + "、".join(dupes))
-
-sys.exit(1 if (missing or stale or dupes) else 0)
-PY
-    CHECK_RC=$?
-    set -e
-    if [ "$CHECK_RC" -eq 0 ]; then
-        ok "index.json 与磁盘目录一致"
-    else
-        warn "index.json 与磁盘目录不一致（详见上方），修正后重试"
-        WARNINGS=$((WARNINGS + 1))
-    fi
+    warn "index.json 与磁盘目录不一致（详见上方），修正后重试"
+    printf '%s\n' "$INDEX_OUT" | sed 's/^/    /'
+    WARNINGS=$((WARNINGS + 1))
 fi
 
 # --- 5. 渲染器 ----------------------------------------------------------
