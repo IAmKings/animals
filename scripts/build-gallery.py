@@ -100,6 +100,48 @@ ALIASES = {
     "wolfdog": ["狼", "狼犬"],
 }
 
+# 目录名 → 拼音。每项是「全拼 + 首字母缩写」，搜索时都能命中。
+# 全拼按中文名逐字拼，缩写取每个字的声母（大猩猩 → daxingxing / dxx）。
+PINYIN = {
+    "ant": ["mayi", "my"],
+    "ape": ["yuan", "y"],
+    "bat": ["bianfu", "bf"],
+    "bee": ["mifeng", "mf"],
+    "butterfly": ["hudie", "hd"],
+    "cat": ["mao", "m"],
+    "chicken": ["ji", "j"],
+    "cicada": ["chan", "c"],
+    "cockroach": ["zhanglang", "zl"],
+    "cow": ["niu", "n"],
+    "crocodile": ["eyu", "ey"],
+    "dinosaur": ["konglong", "kl"],
+    "dog": ["gou", "g"],
+    "dolphin": ["haitun", "ht"],
+    "elephant": ["daxiang", "dx"],
+    "fly": ["cangying", "cy"],
+    "frog": ["qingwa", "qw"],
+    "giraffe": ["changjinglu", "cjl"],
+    "gorilla": ["daxingxing", "dxx"],
+    "horse": ["ma", "m"],
+    "lion": ["shizi", "sz"],
+    "monkey": ["houzi", "hz"],
+    "mosquito": ["wenzi", "wz"],
+    "mouse": ["laoshu", "ls"],
+    "octopus": ["zhangyu", "zy"],
+    "panda": ["xiongmao", "xiong", "xm"],
+    "parrot": ["yingwu", "yw"],
+    "polar-bear": ["beijixiong", "bjx"],
+    "rabbit": ["tuzi", "tz"],
+    "shark": ["shayu", "sy"],
+    "sheep": ["mianyang", "my"],
+    "snake": ["she", "s"],
+    "spider": ["zhizhu", "zz"],
+    "tiger": ["laohu", "lh"],
+    "turtle": ["wugui", "wg"],
+    "whale": ["jingyu", "jy"],
+    "wolfdog": ["langgou", "lg"],
+}
+
 # 页面图标：优先用 cat-01，缺失时退回任意一个图标。
 FAVICON = "icons/cat/cat-01.svg"
 
@@ -253,7 +295,7 @@ TEMPLATE = """<!doctype html>
   <span class="spacer"></span>
   <div class="search">
     <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
-    <input id="q" type="search" placeholder="搜索动物名，支持中文" autocomplete="off">
+    <input id="q" type="search" placeholder="搜索动物名，支持中文与拼音" autocomplete="off">
   </div>
 </header>
 
@@ -322,6 +364,7 @@ for (const animal of DATA) {
   card.dataset.search = [animal.name, animal.zh, ...(animal.aliases || [])]
     .join(' ')
     .toLowerCase();
+  card.dataset.pinyin = (animal.pinyin || []).join(' ');
   grid.appendChild(card);
 }
 
@@ -411,7 +454,10 @@ function toast(msg) {
 document.getElementById('q').addEventListener('input', (e) => {
   const q = e.target.value.trim().toLowerCase();
   for (const card of grid.children) {
-    const hit = !q || card.dataset.search.includes(q);
+    // 中文名与目录名按包含匹配；拼音按前缀匹配，避免 ji 命中「长颈鹿」
+    const hit = !q ||
+      card.dataset.search.includes(q) ||
+      card.dataset.pinyin.split(' ').some((p) => p && p.startsWith(q));
     card.classList.toggle('hidden', !hit);
   }
 });
@@ -438,7 +484,8 @@ def main():
 
     data = []
     total = 0
-    missing = []
+    missing_zh = []
+    missing_pinyin = []
     for name in order:
         dir_path = os.path.join(ICONS, name)
         if not os.path.isdir(dir_path):
@@ -446,7 +493,11 @@ def main():
 
         zh = ZH_NAMES.get(name)
         if not zh:
-            missing.append(name)
+            missing_zh.append(name)
+            continue
+        pinyin = PINYIN.get(name)
+        if not pinyin:
+            missing_pinyin.append(name)
             continue
         aliases = ALIASES.get(name, [])
 
@@ -468,12 +519,23 @@ def main():
         if not variants:
             sys.exit(f"✖ icons/{name} 下没有 SVG")
         total += len(variants)
-        data.append({"name": name, "zh": zh, "aliases": aliases, "variants": variants})
-
-    if missing:
-        sys.exit(
-            "✖ 以下目录缺少中文名，请在 ZH_NAMES 中补充：\n  " + "、".join(missing)
+        data.append(
+            {
+                "name": name,
+                "zh": zh,
+                "aliases": aliases,
+                "pinyin": pinyin,
+                "variants": variants,
+            }
         )
+
+    problems = []
+    if missing_zh:
+        problems.append("缺少中文名（ZH_NAMES）：" + "、".join(missing_zh))
+    if missing_pinyin:
+        problems.append("缺少拼音（PINYIN）：" + "、".join(missing_pinyin))
+    if problems:
+        sys.exit("✖ 以下目录信息不全，请在对应表中补充：\n  " + "\n  ".join(problems))
 
     html = TEMPLATE.replace("__DATA__", json.dumps(data, ensure_ascii=False))
     html = html.replace("__COUNT__", str(total))
