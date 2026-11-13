@@ -1,0 +1,41 @@
+name: 发布站点
+
+# 每次推送到 main 时，重新生成浏览页并强推到 gh-pages 分支，
+# 由 GitHub Pages（gh-pages 分支根目录）对外提供 https://iamkings.github.io/animals/
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 生成浏览页
+        run: python3 scripts/build-gallery.py
+
+      - name: 准备站点文件
+        run: |
+          mkdir -p _site
+          cp index.html .nojekyll _site/
+          cp -r icons _site/
+
+      - name: 推送到 gh-pages
+        run: |
+          cd _site
+          git init -q -b gh-pages
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "发布: 更新站点"
+          git push -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" gh-pages

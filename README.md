@@ -128,7 +128,7 @@ python3 scripts/build-gallery.py
 
 CI 会跑这个脚本并比对结果，忘记重新生成会失败。
 
-页面里的资源路径都是相对路径（`icons/<动物名>/<文件>.svg`，不带前导斜杠），所以放在 GitHub Pages 的子路径 `/animals/` 下也能正常加载。Pages 由 `main` 分支根目录直接发布，`.nojekyll` 用于跳过 Jekyll 处理。
+页面里的资源路径都是相对路径（`icons/<动物名>/<文件>.svg`，不带前导斜杠），所以放在 GitHub Pages 的子路径 `/animals/` 下也能正常加载。站点由 `gh-pages` 分支根目录发布，`.github/workflows/pages.yml` 在每次推送到 `main` 时重新生成页面并强推该分支，所以线上内容始终跟随仓库。`.nojekyll` 用于跳过 Jekyll 处理。
 
 ## 素材投放目录
 
