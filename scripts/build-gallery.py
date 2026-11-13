@@ -17,12 +17,99 @@ ICONS = os.path.join(ROOT, "icons")
 INDEX = os.path.join(ICONS, "index.json")
 OUTPUT = os.path.join(ROOT, "index.html")
 
+# 目录名 → 中文名。新增动物时必须在这里补一条，否则生成脚本会报错，
+# 避免出现「图标有了但搜不到中文名」的情况。
+ZH_NAMES = {
+    "ant": "蚂蚁",
+    "ape": "猿",
+    "bat": "蝙蝠",
+    "bee": "蜜蜂",
+    "butterfly": "蝴蝶",
+    "cat": "猫",
+    "chicken": "鸡",
+    "cicada": "蝉",
+    "cockroach": "蟑螂",
+    "cow": "牛",
+    "crocodile": "鳄鱼",
+    "dinosaur": "恐龙",
+    "dog": "狗",
+    "dolphin": "海豚",
+    "elephant": "大象",
+    "fly": "苍蝇",
+    "frog": "青蛙",
+    "giraffe": "长颈鹿",
+    "gorilla": "大猩猩",
+    "horse": "马",
+    "lion": "狮子",
+    "monkey": "猴子",
+    "mosquito": "蚊子",
+    "mouse": "老鼠",
+    "octopus": "章鱼",
+    "panda": "熊猫",
+    "parrot": "鹦鹉",
+    "polar-bear": "北极熊",
+    "rabbit": "兔子",
+    "shark": "鲨鱼",
+    "sheep": "绵羊",
+    "snake": "蛇",
+    "spider": "蜘蛛",
+    "tiger": "老虎",
+    "turtle": "乌龟",
+    "whale": "鲸鱼",
+    "wolfdog": "狼狗",
+}
+
+# 额外的中文别名，用来覆盖口语说法（搜「小强」也能找到蟑螂）。
+ALIASES = {
+    "ant": ["小蚂蚁"],
+    "ape": ["猩猩", "类人猿"],
+    "bat": ["小蝙蝠"],
+    "bee": ["小蜜蜂"],
+    "butterfly": ["蝶"],
+    "cat": ["猫咪", "小猫"],
+    "chicken": ["小鸡", "母鸡"],
+    "cicada": ["知了"],
+    "cockroach": ["小强"],
+    "cow": ["奶牛", "黄牛"],
+    "crocodile": ["鳄"],
+    "dinosaur": ["霸王龙", "龙"],
+    "dog": ["犬", "小狗"],
+    "dolphin": ["小海豚"],
+    "elephant": ["象"],
+    "fly": ["蝇", "小苍蝇"],
+    "frog": ["蛙", "田鸡"],
+    "giraffe": ["鹿"],
+    "gorilla": ["猩猩"],
+    "horse": ["骏马"],
+    "lion": ["狮"],
+    "monkey": ["猴"],
+    "mosquito": ["小蚊子"],
+    "mouse": ["鼠", "小老鼠"],
+    "octopus": ["八爪鱼"],
+    "panda": ["大熊猫", "猫熊"],
+    "parrot": ["鹦哥"],
+    "polar-bear": ["白熊", "熊"],
+    "rabbit": ["兔", "小兔"],
+    "shark": ["鲨"],
+    "sheep": ["羊", "小羊"],
+    "snake": ["蟒蛇", "小蛇"],
+    "spider": ["小蜘蛛"],
+    "tiger": ["虎"],
+    "turtle": ["龟", "海龟"],
+    "whale": ["鲸"],
+    "wolfdog": ["狼", "狼犬"],
+}
+
+# 页面图标：优先用 cat-01，缺失时退回任意一个图标。
+FAVICON = "icons/cat/cat-01.svg"
+
 TEMPLATE = """<!doctype html>
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>动物图标库 · __COUNT__ 个图标</title>
+<link rel="icon" href="__FAVICON__" type="image/svg+xml">
 <style>
   :root {
     --bg: #f7f7f5;
@@ -78,7 +165,8 @@ TEMPLATE = """<!doctype html>
     border-radius: var(--radius); padding: 12px 12px 10px;
   }
   .card-head { display: flex; align-items: baseline; gap: 8px; margin: 0 2px 10px; }
-  .card-head .name { font-family: var(--mono); font-size: 12.5px; letter-spacing: .02em; }
+  .card-head .zh { font-size: 13px; font-weight: 600; letter-spacing: .02em; }
+  .card-head .name { font-family: var(--mono); font-size: 12px; color: var(--muted); letter-spacing: .02em; }
   .card-head .count { margin-left: auto; color: var(--muted); font-size: 11.5px; font-variant-numeric: tabular-nums; }
 
   .variants { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
@@ -165,7 +253,7 @@ TEMPLATE = """<!doctype html>
   <span class="spacer"></span>
   <div class="search">
     <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
-    <input id="q" type="search" placeholder="搜索动物名" autocomplete="off">
+    <input id="q" type="search" placeholder="搜索动物名，支持中文" autocomplete="off">
   </div>
 </header>
 
@@ -208,6 +296,7 @@ function el(tag, cls, html) {
 for (const animal of DATA) {
   const card = el('div', 'card');
   const head = el('div', 'card-head');
+  head.appendChild(el('span', 'zh', animal.zh));
   head.appendChild(el('span', 'name', animal.name));
   head.appendChild(el('span', 'count', animal.variants.length + ' 变体'));
   card.appendChild(head);
@@ -230,7 +319,9 @@ for (const animal of DATA) {
     wrap.appendChild(tile);
   }
   card.appendChild(wrap);
-  card.dataset.animal = animal.name;
+  card.dataset.search = [animal.name, animal.zh, ...(animal.aliases || [])]
+    .join(' ')
+    .toLowerCase();
   grid.appendChild(card);
 }
 
@@ -260,7 +351,7 @@ function renderAside(v) {
 
   const meta = el('div', 'meta');
   meta.innerHTML =
-    '<div><span class="k">名称 </span>' + v.name + '</div>' +
+    '<div><span class="k">名称 </span>' + v.zh + '（' + v.name + '）</div>' +
     '<div><span class="k">序号 </span>' + v.index + '</div>' +
     '<div><span class="k">路径 </span>' + v.path + '</div>';
   aside.appendChild(meta);
@@ -320,7 +411,7 @@ function toast(msg) {
 document.getElementById('q').addEventListener('input', (e) => {
   const q = e.target.value.trim().toLowerCase();
   for (const card of grid.children) {
-    const hit = !q || card.dataset.animal.toLowerCase().includes(q);
+    const hit = !q || card.dataset.search.includes(q);
     card.classList.toggle('hidden', !hit);
   }
 });
@@ -347,10 +438,17 @@ def main():
 
     data = []
     total = 0
+    missing = []
     for name in order:
         dir_path = os.path.join(ICONS, name)
         if not os.path.isdir(dir_path):
             sys.exit(f"✖ 目录不存在：icons/{name}")
+
+        zh = ZH_NAMES.get(name)
+        if not zh:
+            missing.append(name)
+            continue
+        aliases = ALIASES.get(name, [])
 
         variants = []
         for entry in sorted(os.listdir(dir_path)):
@@ -359,16 +457,27 @@ def main():
             stem = entry[: -len(".svg")]
             index = stem.rsplit("-", 1)[-1]
             variants.append(
-                {"name": stem, "index": index, "path": f"icons/{name}/{entry}"}
+                {
+                    "name": stem,
+                    "index": index,
+                    "zh": zh,
+                    "path": f"icons/{name}/{entry}",
+                }
             )
 
         if not variants:
             sys.exit(f"✖ icons/{name} 下没有 SVG")
         total += len(variants)
-        data.append({"name": name, "variants": variants})
+        data.append({"name": name, "zh": zh, "aliases": aliases, "variants": variants})
+
+    if missing:
+        sys.exit(
+            "✖ 以下目录缺少中文名，请在 ZH_NAMES 中补充：\n  " + "、".join(missing)
+        )
 
     html = TEMPLATE.replace("__DATA__", json.dumps(data, ensure_ascii=False))
     html = html.replace("__COUNT__", str(total))
+    html = html.replace("__FAVICON__", FAVICON)
 
     with open(OUTPUT, "w", encoding="utf-8") as fh:
         fh.write(html)

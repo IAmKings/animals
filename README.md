@@ -118,7 +118,7 @@ icons/chicken/chicken-01.svg
 
 ## 浏览页
 
-根目录的 [`index.html`](index.html) 是素材浏览页，双击即可打开，不需要起服务；也发布在 <https://iamkings.github.io/animals/>。左侧按 `icons/index.json` 的顺序列出全部动物，每张卡片一行显示该动物的 6 个变体；点击图标会选中并在右侧显示大图和路径，可以复制路径或 `<img>` 标签，底部工具条汇总已选内容。搜索框按动物名过滤。
+根目录的 [`index.html`](index.html) 是素材浏览页，双击即可打开，不需要起服务；也发布在 <https://iamkings.github.io/animals/>。左侧按 `icons/index.json` 的顺序列出全部动物，每张卡片一行显示该动物的 6 个变体；点击图标会选中并在右侧显示大图和路径，可以复制路径或 `<img>` 标签，底部工具条汇总已选内容。搜索框支持中英文：可以按目录名（`cat`）、中文名（`猫`）或别名（`小强` → 蟑螂）过滤。
 
 页面用 `<img>` 引用真实文件，不内联 SVG 内容，所以看到的就是 `icons/` 里的文件本身。素材有增减或改名后，重新生成一次：
 
@@ -127,6 +127,8 @@ python3 scripts/build-gallery.py
 ```
 
 CI 会跑这个脚本并比对结果，忘记重新生成会失败。
+
+新增动物时要在 `scripts/build-gallery.py` 的 `ZH_NAMES` 里补一条中文名，否则生成脚本会直接报错并列出缺失的目录——避免出现「图标有了但搜不到中文名」。别名可选，加在 `ALIASES` 里。
 
 页面里的资源路径都是相对路径（`icons/<动物名>/<文件>.svg`，不带前导斜杠），所以放在 GitHub Pages 的子路径 `/animals/` 下也能正常加载。站点由 `gh-pages` 分支根目录发布，`.github/workflows/pages.yml` 在每次推送到 `main` 时重新生成页面并强推该分支，所以线上内容始终跟随仓库。`.nojekyll` 用于跳过 Jekyll 处理。
 
