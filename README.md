@@ -82,8 +82,10 @@ PNG 属于派生产物，**不纳入版本控制**（已在 `.gitignore` 中排�
 ```bash
 scripts/export-png.sh              # 全部导出，长边 1024px
 scripts/export-png.sh 512          # 指定长边尺寸
-scripts/export-png.sh 1024 03-cow  # 只导出某个目录
+scripts/export-png.sh 1024 cow     # 只导出某个目录
 ```
+
+导出前会先校验 `icons/index.json` 与磁盘目录是否一一对应。发现「磁盘有但 index 未收录」「index 有但磁盘不存在」「index 中重复」中任一情况时报错退出，避免拿着过期的顺序清单去渲染。确实需要跳过校验时加 `SKIP_INDEX_CHECK=1`。
 
 默认用 ImageMagick 内置渲染器，足以应付单路径图标；若安装了 `rsvg-convert` 会自动优先使用。SVG 含渐变、滤镜、遮罩等复杂特性时，请先 `brew install librsvg`，否则内置渲染器会失真。
 
