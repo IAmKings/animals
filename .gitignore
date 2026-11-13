@@ -42,3 +42,6 @@ coverage/
 
 # 图标派生文件：由 scripts/export-png.sh 从 SVG 生成，不纳入版本控制
 icons/**/*.png
+
+# 原始素材投放目录：只作暂存，不进入版本库
+/SVG/

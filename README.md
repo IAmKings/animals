@@ -93,7 +93,7 @@ bash scripts/check-commits.sh origin/main..HEAD
 
 ## 图标素材
 
-`icons/` 下 17 个目录，每个目录 6 个 SVG。**SVG 是唯一源文件。**
+`icons/` 下 37 个目录，每个目录 6 个 SVG。**SVG 是唯一源文件。**
 
 命名规则：
 
@@ -115,6 +115,12 @@ icons/chicken/chicken-01.svg
 ```
 
 新增动物时，记得同时把名字加进 `icons/index.json`。
+
+## 素材投放目录
+
+根目录的 `SVG/` 是原始素材的暂存区，**不进入版本库**（`.gitignore` 里有 `/SVG/`）。新一批图标放进去后，整理方式是把每个 `SVG/<批次号>-<动物名>/` 里的文件复制成 `icons/<动物名>/<动物名>-<序号>.svg`，去掉批次号前缀，再更新 `icons/index.json`。
+
+`SVG/` 只是收件箱，`icons/` 才是唯一的源。整理完 `SVG/` 可以随时删掉，不影响仓库内容。
 
 PNG 属于派生产物，**不纳入版本控制**（已在 `.gitignore` 中排除 `icons/**/*.png`）。需要时运行脚本生成：
 
