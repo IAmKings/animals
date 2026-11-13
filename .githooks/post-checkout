@@ -1,0 +1,21 @@
+#!/bin/sh
+#
+# post-checkout：每次 checkout / 克隆后校验并修复钩子路径。
+#
+# 参数（git 传入，这里用不到）：
+#   $1 旧 HEAD   $2 新 HEAD   $3 是否分支切换（1=分支，0=文件）
+#
+# 任何情况下都返回 0，不阻断 git 操作。
+
+root=$(git rev-parse --show-toplevel 2>/dev/null) || exit 0
+[ -d "$root/.githooks" ] || exit 0
+
+current=$(git config --local --get core.hooksPath 2>/dev/null)
+
+if [ "$current" != ".githooks" ]; then
+    if git config --local core.hooksPath .githooks 2>/dev/null; then
+        echo "提示：已自动启用本仓库钩子（core.hooksPath=.githooks）" >&2
+    fi
+fi
+
+exit 0
