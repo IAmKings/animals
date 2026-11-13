@@ -1,0 +1,43 @@
+#!/bin/sh
+# 提交信息校验：本项目所有 commit 必须使用中文。
+#
+# 启用方式（克隆仓库后执行一次）：
+#   git config core.hooksPath .githooks
+
+msg_file="$1"
+
+# git 自动生成的合并提交（Merge branch ...）无法改写，直接放行
+if [ -f "$(git rev-parse --git-dir)/MERGE_HEAD" ]; then
+    exit 0
+fi
+
+# 取第一行：跳过注释行和空行，作为提交标题
+subject=$(sed -e '/^#/d' -e '/^[[:space:]]*$/d' "$msg_file" | head -n 1)
+
+if [ -z "$subject" ]; then
+    echo "✖ 提交信息不能为空。" >&2
+    exit 1
+fi
+
+has_chinese=$(printf '%s' "$subject" \
+    | perl -CSD -ne 'BEGIN { $f = 0 } $f = 1 if /[\x{4E00}-\x{9FFF}]/; END { print $f ? 1 : 0 }')
+
+if [ "$has_chinese" != "1" ]; then
+    cat >&2 <<'EOF'
+✖ 提交信息必须使用中文。
+
+  推荐格式：类型: 简要说明
+  例如：    修复: 处理上传超时导致的重试失败
+
+  feat   新功能    fix    修复
+  docs   文档      style  格式
+  refactor 重构    perf   性能
+  test   测试      chore  构建/杂项
+
+  技术术语（API、Redis、OOM 等）可以保留原文，
+  但整句描述的主体必须是中文。
+EOF
+    exit 1
+fi
+
+exit 0

@@ -1,0 +1,41 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# 编辑器 / IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Node
+node_modules/
+dist/
+.npm/
+pnpm-debug.log*
+npm-debug.log*
+yarn-error.log*
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# 环境变量与本地密钥
+.env
+.env.*
+!.env.example
+*.local
+
+# 构建产物 / 缓存
+build/
+out/
+coverage/
+.cache/
+*.log
