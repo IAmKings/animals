@@ -77,6 +77,7 @@ git commit --no-verify -m "提交信息"
 | --- | --- | --- |
 | 环境配置与钩子自检 | `scripts/setup.sh` | 钩子无法启用或自检不通过 |
 | 素材索引校验 | `scripts/check-index.sh` | `icons/index.json` 与磁盘目录不一致 |
+| SVG 语法校验 | `scripts/check-svg.sh` | SVG 无法解析、缺 `viewBox`、含脚本或外部引用 |
 | 提交信息校验 | `scripts/check-commits.sh` | 本次推送的提交信息不含中文 |
 
 三个脚本都能在本地单独运行，推送前先跑一遍可以省一次往返：
@@ -84,6 +85,7 @@ git commit --no-verify -m "提交信息"
 ```bash
 bash scripts/setup.sh
 bash scripts/check-index.sh
+bash scripts/check-svg.sh
 bash scripts/check-commits.sh origin/main..HEAD
 ```
 

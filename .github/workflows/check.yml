@@ -31,6 +31,9 @@ jobs:
       - name: 校验 icons/index.json
         run: bash scripts/check-index.sh
 
+      - name: 校验 SVG 语法
+        run: bash scripts/check-svg.sh
+
       - name: 校验提交信息为中文
         run: |
           set -euo pipefail
