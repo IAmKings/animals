@@ -7,7 +7,7 @@
 # 做四件事：
 #   1. 启用 .githooks（中文提交校验）
 #   2. 自检提交钩子确实生效
-#   3. 校验 icons/index.json 与磁盘目录一致
+#   3. 校验图标素材组织（索引与文件名规范）
 #   4. 检查 PNG 导出所需的渲染器
 #
 set -euo pipefail
@@ -92,7 +92,7 @@ set -e
 if [ "$CHECK_RC" -eq 0 ]; then
     ok "$(printf '%s' "$INDEX_OUT" | sed 's/^✔ //')"
 else
-    warn "index.json 与磁盘目录不一致（详见上方），修正后重试"
+    warn "图标素材校验未通过（详见上方），修正后重试"
     printf '%s\n' "$INDEX_OUT" | sed 's/^/    /'
     WARNINGS=$((WARNINGS + 1))
 fi

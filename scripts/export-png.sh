@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# 从 icons/ 下的 SVG 源文件生成 PNG 图标，并校验 icons/index.json 与目录是否一致。
+# 从 icons/ 下的 SVG 源文件生成 PNG 图标，导出前先校验图标素材组织。
 #
 # PNG 是派生产物，已在 .gitignore 中排除。需要时运行本脚本即可，
 # 不要把它们提交进仓库。

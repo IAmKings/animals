@@ -28,7 +28,7 @@ jobs:
       - name: 配置环境并自检
         run: bash scripts/setup.sh
 
-      - name: 校验 icons/index.json
+      - name: 校验图标素材组织
         run: bash scripts/check-index.sh
 
       - name: 校验 SVG 语法

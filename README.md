@@ -76,7 +76,7 @@ git commit --no-verify -m "提交信息"
 | 步骤 | 脚本 | 失败条件 |
 | --- | --- | --- |
 | 环境配置与钩子自检 | `scripts/setup.sh` | 钩子无法启用或自检不通过 |
-| 素材索引校验 | `scripts/check-index.sh` | `icons/index.json` 与磁盘目录不一致 |
+| 素材组织校验 | `scripts/check-index.sh` | 索引与磁盘目录不一致，或文件名不符合命名规则 |
 | SVG 语法校验 | `scripts/check-svg.sh` | SVG 无法解析、缺 `viewBox`、含脚本或外部引用 |
 | 提交信息校验 | `scripts/check-commits.sh` | 本次推送的提交信息不含中文 |
 
@@ -105,6 +105,8 @@ icons/chicken/chicken-01.svg
 目录名只用动物名，**不带序号**——图标是分批生成的，各批次的编号会互相重复，用名字做标识才稳定。新增动物时直接建 `icons/<动物名>/` 即可，不需要维护任何计数器。
 
 同一动物内 `01`–`06` 的序号表示 6 个变体。
+
+以上规则由 `scripts/check-index.sh` 强制，本地和 CI 都会跑。它检查：索引与磁盘目录是否一一对应、文件名是否为 `<目录名>-两位序号.svg`、前缀是否与所在目录同名、同一目录内序号是否重复、目录里有没有混进子目录或非 SVG 文件。隐藏文件（`.DS_Store`）和 `.gitignore` 忽略的文件（就地导出的 PNG）不参与检查。
 
 展示顺序由 [`icons/index.json`](icons/index.json) 定义，是一个目录名数组，目前按字母序排列。要调整顺序只改这个文件，不要给目录加序号，也不要用目录名的排序结果当展示顺序：
 
