@@ -44,6 +44,28 @@ else
     exit 1
 fi
 
+# 同时在 .git/hooks 放一份入口。core.hooksPath 一旦被误清空，git 会退回
+# .git/hooks，这份入口就能把配置改回去，实现真正的自愈。
+if [ -d .git/hooks ]; then
+    INSTALLED=0
+    for hook in commit-msg post-checkout; do
+        target=".git/hooks/$hook"
+        rm -f "$target"
+        if ln -s "../../.githooks/$hook" "$target" 2>/dev/null; then
+            INSTALLED=$((INSTALLED + 1))
+        elif cp ".githooks/$hook" "$target" 2>/dev/null; then
+            chmod +x "$target"
+            INSTALLED=$((INSTALLED + 1))
+        fi
+    done
+    if [ "$INSTALLED" -eq 2 ]; then
+        ok "已在 .git/hooks 安装自愈入口"
+    else
+        warn "部分钩子入口安装失败，配置被清空时无法自动修复"
+        WARNINGS=$((WARNINGS + 1))
+    fi
+fi
+
 # --- 3. 自检提交钩子 ----------------------------------------------------
 HOOK_TEST=$(mktemp)
 trap 'rm -f "$HOOK_TEST"' EXIT

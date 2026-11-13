@@ -52,7 +52,12 @@ git config core.hooksPath .githooks
 
 这一步无法省略。git 只有在 `core.hooksPath` 指向 `.githooks` 之后，才可能找到并执行里面的钩子，所以 `post-checkout` 无法完成自身的首次引导——新克隆时它根本还没被 git 看见。
 
-执行过一次之后，每次 checkout、切分支、pull 都会触发 `post-checkout` 自检，配置被误改也会自动修回，不会再退化。
+执行过一次之后，`setup.sh` 会顺手在 `.git/hooks/` 里放两个软链入口。这样即使 `core.hooksPath` 被误清空，git 退回默认的 `.git/hooks`，钩子照样会执行，`post-checkout` 再把配置改回 `.githooks`——自愈靠的是这份入口，不是钩子本身。
+
+两种例外情况无法自愈，需要重新跑一次 `bash scripts/setup.sh`：
+
+- `core.hooksPath` 被指向**另一个存在的目录**，git 只会在那里找钩子，本仓库的入口不会被调用
+- `.git/hooks/` 被整个删掉
 
 ### 临时跳过校验
 
