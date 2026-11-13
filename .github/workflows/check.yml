@@ -38,12 +38,12 @@ jobs:
         run: |
           set -euo pipefail
           python3 scripts/build-gallery.py
-          if ! git diff --quiet -- gallery.html; then
-            echo "✖ gallery.html 与 icons/ 不同步，请在本地执行 python3 scripts/build-gallery.py 后提交。" >&2
-            git diff --stat -- gallery.html >&2
+          if ! git diff --quiet -- index.html; then
+            echo "✖ index.html 与 icons/ 不同步，请在本地执行 python3 scripts/build-gallery.py 后提交。" >&2
+            git diff --stat -- index.html >&2
             exit 1
           fi
-          echo "✔ gallery.html 与素材一致"
+          echo "✔ index.html 与素材一致"
 
       - name: 校验提交信息为中文
         run: |

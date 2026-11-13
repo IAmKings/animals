@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""生成 icons/ 的浏览页 gallery.html。
+"""生成 icons/ 的浏览页 index.html（GitHub Pages 入口）。
 
 页面用 <img> 引用真实文件，不内联 SVG 内容，所以打开时看到的就是
 icons/ 里的文件本身，不会和磁盘上的素材不同步。
@@ -15,7 +15,7 @@ import sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ICONS = os.path.join(ROOT, "icons")
 INDEX = os.path.join(ICONS, "index.json")
-OUTPUT = os.path.join(ROOT, "gallery.html")
+OUTPUT = os.path.join(ROOT, "index.html")
 
 TEMPLATE = """<!doctype html>
 <html lang="zh-CN">
@@ -374,7 +374,7 @@ def main():
         fh.write(html)
 
     size = os.path.getsize(OUTPUT) / 1024
-    print(f"✔ 已生成 gallery.html（{len(data)} 种动物，{total} 个图标，{size:.0f} KB）")
+    print(f"✔ 已生成 index.html（{len(data)} 种动物，{total} 个图标，{size:.0f} KB）")
 
 
 if __name__ == "__main__":
