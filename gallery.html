@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>动物图标库 · 222 个图标</title>
+<style>
+  :root {
+    --bg: #f7f7f5;
+    --surface: #ffffff;
+    --line: #e4e4df;
+    --ink: #1a1a18;
+    --muted: #8a8a84;
+    --accent: #2f6f4e;
+    --accent-soft: #eaf2ed;
+    --radius: 10px;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font: 14px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+          "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  header {
+    position: sticky; top: 0; z-index: 20;
+    display: flex; align-items: center; gap: 16px;
+    padding: 14px 24px;
+    background: rgba(247, 247, 245, .88);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--line);
+  }
+  header h1 { margin: 0; font-size: 15px; font-weight: 600; letter-spacing: .01em; }
+  header .stat { color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; }
+  header .spacer { flex: 1; }
+
+  .search { position: relative; }
+  .search input {
+    width: 240px; padding: 7px 12px 7px 30px;
+    border: 1px solid var(--line); border-radius: 8px;
+    background: var(--surface); color: var(--ink);
+    font: inherit; font-size: 13px;
+    outline: none; transition: border-color .15s, box-shadow .15s;
+  }
+  .search input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  .search svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 13px; height: 13px; stroke: var(--muted); fill: none; stroke-width: 2; }
+
+  .layout { display: flex; align-items: flex-start; gap: 24px; padding: 24px; max-width: 1500px; margin: 0 auto; }
+  main { flex: 1; min-width: 0; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); gap: 16px; }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: var(--radius); padding: 12px 12px 10px;
+  }
+  .card-head { display: flex; align-items: baseline; gap: 8px; margin: 0 2px 10px; }
+  .card-head .name { font-family: var(--mono); font-size: 12.5px; letter-spacing: .02em; }
+  .card-head .count { margin-left: auto; color: var(--muted); font-size: 11.5px; font-variant-numeric: tabular-nums; }
+
+  .variants { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
+
+  .tile {
+    position: relative; display: block; width: 100%; aspect-ratio: 1;
+    padding: 6px; border: 1px solid transparent; border-radius: 8px;
+    background: #fbfbfa; cursor: pointer; transition: background .12s, border-color .12s, transform .12s;
+  }
+  .tile:hover { background: var(--accent-soft); transform: translateY(-1px); }
+  .tile img { width: 100%; height: 100%; object-fit: contain; display: block; }
+  .tile .tag {
+    position: absolute; left: 5px; bottom: 3px;
+    font-family: var(--mono); font-size: 9.5px; color: var(--muted);
+    opacity: 0; transition: opacity .12s;
+  }
+  .tile:hover .tag, .tile.selected .tag { opacity: 1; }
+  .tile.selected { border-color: var(--accent); background: var(--accent-soft); }
+  .tile.selected::after {
+    content: ""; position: absolute; right: 4px; top: 4px;
+    width: 7px; height: 7px; border-radius: 50%; background: var(--accent);
+  }
+
+  aside {
+    position: sticky; top: 76px; width: 320px; flex: none;
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: var(--radius); padding: 16px;
+  }
+  aside.empty { color: var(--muted); font-size: 13px; text-align: center; padding: 48px 16px; }
+  .preview {
+    display: flex; align-items: center; justify-content: center;
+    height: 180px; background: #fbfbfa; border-radius: 8px; margin-bottom: 14px;
+  }
+  .preview img { max-width: 150px; max-height: 150px; }
+  .meta { font-family: var(--mono); font-size: 12px; line-height: 1.9; word-break: break-all; }
+  .meta .k { color: var(--muted); }
+  .actions { display: flex; gap: 8px; margin-top: 14px; }
+  button {
+    font: inherit; font-size: 12.5px; padding: 7px 12px; border-radius: 7px;
+    border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+    cursor: pointer; transition: background .12s, border-color .12s;
+  }
+  button:hover { background: #f2f2ef; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  button.primary:hover { background: #275c41; }
+  button.wide { flex: 1; }
+
+  .selbar {
+    position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%);
+    display: flex; align-items: center; gap: 12px;
+    padding: 9px 12px 9px 16px;
+    background: var(--ink); color: #fff; border-radius: 999px;
+    box-shadow: 0 6px 24px rgba(0,0,0,.18); font-size: 13px;
+    opacity: 0; pointer-events: none; transition: opacity .15s, transform .15s;
+  }
+  .selbar.show { opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(0); }
+  .selbar .n { font-variant-numeric: tabular-nums; }
+  .selbar button { background: transparent; border-color: rgba(255,255,255,.28); color: #fff; padding: 5px 11px; }
+  .selbar button:hover { background: rgba(255,255,255,.12); }
+
+  .toast {
+    position: fixed; left: 50%; bottom: 84px; transform: translateX(-50%) translateY(6px);
+    background: var(--accent); color: #fff; font-size: 12.5px;
+    padding: 7px 14px; border-radius: 999px; opacity: 0;
+    transition: opacity .18s, transform .18s; pointer-events: none; z-index: 40;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .hidden { display: none !important; }
+
+  @media (max-width: 900px) {
+    .layout { flex-direction: column; padding: 16px; }
+    aside { position: static; width: 100%; }
+    header { flex-wrap: wrap; padding: 12px 16px; }
+    .search input { width: 160px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>动物图标库</h1>
+  <span class="stat" id="stat"></span>
+  <span class="spacer"></span>
+  <div class="search">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+    <input id="q" type="search" placeholder="搜索动物名" autocomplete="off">
+  </div>
+</header>
+
+<div class="layout">
+  <main><div class="grid" id="grid"></div></main>
+  <aside class="empty" id="aside">点击任意图标查看详情</aside>
+</div>
+
+<div class="selbar" id="selbar">
+  <span>已选 <span class="n" id="selcount">0</span> 个</span>
+  <button id="copyall">复制全部路径</button>
+  <button id="clearall">清空</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const DATA = [{"name": "ant", "variants": [{"name": "ant-01", "index": "01", "path": "icons/ant/ant-01.svg"}, {"name": "ant-02", "index": "02", "path": "icons/ant/ant-02.svg"}, {"name": "ant-03", "index": "03", "path": "icons/ant/ant-03.svg"}, {"name": "ant-04", "index": "04", "path": "icons/ant/ant-04.svg"}, {"name": "ant-05", "index": "05", "path": "icons/ant/ant-05.svg"}, {"name": "ant-06", "index": "06", "path": "icons/ant/ant-06.svg"}]}, {"name": "ape", "variants": [{"name": "ape-01", "index": "01", "path": "icons/ape/ape-01.svg"}, {"name": "ape-02", "index": "02", "path": "icons/ape/ape-02.svg"}, {"name": "ape-03", "index": "03", "path": "icons/ape/ape-03.svg"}, {"name": "ape-04", "index": "04", "path": "icons/ape/ape-04.svg"}, {"name": "ape-05", "index": "05", "path": "icons/ape/ape-05.svg"}, {"name": "ape-06", "index": "06", "path": "icons/ape/ape-06.svg"}]}, {"name": "bat", "variants": [{"name": "bat-01", "index": "01", "path": "icons/bat/bat-01.svg"}, {"name": "bat-02", "index": "02", "path": "icons/bat/bat-02.svg"}, {"name": "bat-03", "index": "03", "path": "icons/bat/bat-03.svg"}, {"name": "bat-04", "index": "04", "path": "icons/bat/bat-04.svg"}, {"name": "bat-05", "index": "05", "path": "icons/bat/bat-05.svg"}, {"name": "bat-06", "index": "06", "path": "icons/bat/bat-06.svg"}]}, {"name": "bee", "variants": [{"name": "bee-01", "index": "01", "path": "icons/bee/bee-01.svg"}, {"name": "bee-02", "index": "02", "path": "icons/bee/bee-02.svg"}, {"name": "bee-03", "index": "03", "path": "icons/bee/bee-03.svg"}, {"name": "bee-04", "index": "04", "path": "icons/bee/bee-04.svg"}, {"name": "bee-05", "index": "05", "path": "icons/bee/bee-05.svg"}, {"name": "bee-06", "index": "06", "path": "icons/bee/bee-06.svg"}]}, {"name": "butterfly", "variants": [{"name": "butterfly-01", "index": "01", "path": "icons/butterfly/butterfly-01.svg"}, {"name": "butterfly-02", "index": "02", "path": "icons/butterfly/butterfly-02.svg"}, {"name": "butterfly-03", "index": "03", "path": "icons/butterfly/butterfly-03.svg"}, {"name": "butterfly-04", "index": "04", "path": "icons/butterfly/butterfly-04.svg"}, {"name": "butterfly-05", "index": "05", "path": "icons/butterfly/butterfly-05.svg"}, {"name": "butterfly-06", "index": "06", "path": "icons/butterfly/butterfly-06.svg"}]}, {"name": "cat", "variants": [{"name": "cat-01", "index": "01", "path": "icons/cat/cat-01.svg"}, {"name": "cat-02", "index": "02", "path": "icons/cat/cat-02.svg"}, {"name": "cat-03", "index": "03", "path": "icons/cat/cat-03.svg"}, {"name": "cat-04", "index": "04", "path": "icons/cat/cat-04.svg"}, {"name": "cat-05", "index": "05", "path": "icons/cat/cat-05.svg"}, {"name": "cat-06", "index": "06", "path": "icons/cat/cat-06.svg"}]}, {"name": "chicken", "variants": [{"name": "chicken-01", "index": "01", "path": "icons/chicken/chicken-01.svg"}, {"name": "chicken-02", "index": "02", "path": "icons/chicken/chicken-02.svg"}, {"name": "chicken-03", "index": "03", "path": "icons/chicken/chicken-03.svg"}, {"name": "chicken-04", "index": "04", "path": "icons/chicken/chicken-04.svg"}, {"name": "chicken-05", "index": "05", "path": "icons/chicken/chicken-05.svg"}, {"name": "chicken-06", "index": "06", "path": "icons/chicken/chicken-06.svg"}]}, {"name": "cicada", "variants": [{"name": "cicada-01", "index": "01", "path": "icons/cicada/cicada-01.svg"}, {"name": "cicada-02", "index": "02", "path": "icons/cicada/cicada-02.svg"}, {"name": "cicada-03", "index": "03", "path": "icons/cicada/cicada-03.svg"}, {"name": "cicada-04", "index": "04", "path": "icons/cicada/cicada-04.svg"}, {"name": "cicada-05", "index": "05", "path": "icons/cicada/cicada-05.svg"}, {"name": "cicada-06", "index": "06", "path": "icons/cicada/cicada-06.svg"}]}, {"name": "cockroach", "variants": [{"name": "cockroach-01", "index": "01", "path": "icons/cockroach/cockroach-01.svg"}, {"name": "cockroach-02", "index": "02", "path": "icons/cockroach/cockroach-02.svg"}, {"name": "cockroach-03", "index": "03", "path": "icons/cockroach/cockroach-03.svg"}, {"name": "cockroach-04", "index": "04", "path": "icons/cockroach/cockroach-04.svg"}, {"name": "cockroach-05", "index": "05", "path": "icons/cockroach/cockroach-05.svg"}, {"name": "cockroach-06", "index": "06", "path": "icons/cockroach/cockroach-06.svg"}]}, {"name": "cow", "variants": [{"name": "cow-01", "index": "01", "path": "icons/cow/cow-01.svg"}, {"name": "cow-02", "index": "02", "path": "icons/cow/cow-02.svg"}, {"name": "cow-03", "index": "03", "path": "icons/cow/cow-03.svg"}, {"name": "cow-04", "index": "04", "path": "icons/cow/cow-04.svg"}, {"name": "cow-05", "index": "05", "path": "icons/cow/cow-05.svg"}, {"name": "cow-06", "index": "06", "path": "icons/cow/cow-06.svg"}]}, {"name": "crocodile", "variants": [{"name": "crocodile-01", "index": "01", "path": "icons/crocodile/crocodile-01.svg"}, {"name": "crocodile-02", "index": "02", "path": "icons/crocodile/crocodile-02.svg"}, {"name": "crocodile-03", "index": "03", "path": "icons/crocodile/crocodile-03.svg"}, {"name": "crocodile-04", "index": "04", "path": "icons/crocodile/crocodile-04.svg"}, {"name": "crocodile-05", "index": "05", "path": "icons/crocodile/crocodile-05.svg"}, {"name": "crocodile-06", "index": "06", "path": "icons/crocodile/crocodile-06.svg"}]}, {"name": "dinosaur", "variants": [{"name": "dinosaur-01", "index": "01", "path": "icons/dinosaur/dinosaur-01.svg"}, {"name": "dinosaur-02", "index": "02", "path": "icons/dinosaur/dinosaur-02.svg"}, {"name": "dinosaur-03", "index": "03", "path": "icons/dinosaur/dinosaur-03.svg"}, {"name": "dinosaur-04", "index": "04", "path": "icons/dinosaur/dinosaur-04.svg"}, {"name": "dinosaur-05", "index": "05", "path": "icons/dinosaur/dinosaur-05.svg"}, {"name": "dinosaur-06", "index": "06", "path": "icons/dinosaur/dinosaur-06.svg"}]}, {"name": "dog", "variants": [{"name": "dog-01", "index": "01", "path": "icons/dog/dog-01.svg"}, {"name": "dog-02", "index": "02", "path": "icons/dog/dog-02.svg"}, {"name": "dog-03", "index": "03", "path": "icons/dog/dog-03.svg"}, {"name": "dog-04", "index": "04", "path": "icons/dog/dog-04.svg"}, {"name": "dog-05", "index": "05", "path": "icons/dog/dog-05.svg"}, {"name": "dog-06", "index": "06", "path": "icons/dog/dog-06.svg"}]}, {"name": "dolphin", "variants": [{"name": "dolphin-01", "index": "01", "path": "icons/dolphin/dolphin-01.svg"}, {"name": "dolphin-02", "index": "02", "path": "icons/dolphin/dolphin-02.svg"}, {"name": "dolphin-03", "index": "03", "path": "icons/dolphin/dolphin-03.svg"}, {"name": "dolphin-04", "index": "04", "path": "icons/dolphin/dolphin-04.svg"}, {"name": "dolphin-05", "index": "05", "path": "icons/dolphin/dolphin-05.svg"}, {"name": "dolphin-06", "index": "06", "path": "icons/dolphin/dolphin-06.svg"}]}, {"name": "elephant", "variants": [{"name": "elephant-01", "index": "01", "path": "icons/elephant/elephant-01.svg"}, {"name": "elephant-02", "index": "02", "path": "icons/elephant/elephant-02.svg"}, {"name": "elephant-03", "index": "03", "path": "icons/elephant/elephant-03.svg"}, {"name": "elephant-04", "index": "04", "path": "icons/elephant/elephant-04.svg"}, {"name": "elephant-05", "index": "05", "path": "icons/elephant/elephant-05.svg"}, {"name": "elephant-06", "index": "06", "path": "icons/elephant/elephant-06.svg"}]}, {"name": "fly", "variants": [{"name": "fly-01", "index": "01", "path": "icons/fly/fly-01.svg"}, {"name": "fly-02", "index": "02", "path": "icons/fly/fly-02.svg"}, {"name": "fly-03", "index": "03", "path": "icons/fly/fly-03.svg"}, {"name": "fly-04", "index": "04", "path": "icons/fly/fly-04.svg"}, {"name": "fly-05", "index": "05", "path": "icons/fly/fly-05.svg"}, {"name": "fly-06", "index": "06", "path": "icons/fly/fly-06.svg"}]}, {"name": "frog", "variants": [{"name": "frog-01", "index": "01", "path": "icons/frog/frog-01.svg"}, {"name": "frog-02", "index": "02", "path": "icons/frog/frog-02.svg"}, {"name": "frog-03", "index": "03", "path": "icons/frog/frog-03.svg"}, {"name": "frog-04", "index": "04", "path": "icons/frog/frog-04.svg"}, {"name": "frog-05", "index": "05", "path": "icons/frog/frog-05.svg"}, {"name": "frog-06", "index": "06", "path": "icons/frog/frog-06.svg"}]}, {"name": "giraffe", "variants": [{"name": "giraffe-01", "index": "01", "path": "icons/giraffe/giraffe-01.svg"}, {"name": "giraffe-02", "index": "02", "path": "icons/giraffe/giraffe-02.svg"}, {"name": "giraffe-03", "index": "03", "path": "icons/giraffe/giraffe-03.svg"}, {"name": "giraffe-04", "index": "04", "path": "icons/giraffe/giraffe-04.svg"}, {"name": "giraffe-05", "index": "05", "path": "icons/giraffe/giraffe-05.svg"}, {"name": "giraffe-06", "index": "06", "path": "icons/giraffe/giraffe-06.svg"}]}, {"name": "gorilla", "variants": [{"name": "gorilla-01", "index": "01", "path": "icons/gorilla/gorilla-01.svg"}, {"name": "gorilla-02", "index": "02", "path": "icons/gorilla/gorilla-02.svg"}, {"name": "gorilla-03", "index": "03", "path": "icons/gorilla/gorilla-03.svg"}, {"name": "gorilla-04", "index": "04", "path": "icons/gorilla/gorilla-04.svg"}, {"name": "gorilla-05", "index": "05", "path": "icons/gorilla/gorilla-05.svg"}, {"name": "gorilla-06", "index": "06", "path": "icons/gorilla/gorilla-06.svg"}]}, {"name": "horse", "variants": [{"name": "horse-01", "index": "01", "path": "icons/horse/horse-01.svg"}, {"name": "horse-02", "index": "02", "path": "icons/horse/horse-02.svg"}, {"name": "horse-03", "index": "03", "path": "icons/horse/horse-03.svg"}, {"name": "horse-04", "index": "04", "path": "icons/horse/horse-04.svg"}, {"name": "horse-05", "index": "05", "path": "icons/horse/horse-05.svg"}, {"name": "horse-06", "index": "06", "path": "icons/horse/horse-06.svg"}]}, {"name": "lion", "variants": [{"name": "lion-01", "index": "01", "path": "icons/lion/lion-01.svg"}, {"name": "lion-02", "index": "02", "path": "icons/lion/lion-02.svg"}, {"name": "lion-03", "index": "03", "path": "icons/lion/lion-03.svg"}, {"name": "lion-04", "index": "04", "path": "icons/lion/lion-04.svg"}, {"name": "lion-05", "index": "05", "path": "icons/lion/lion-05.svg"}, {"name": "lion-06", "index": "06", "path": "icons/lion/lion-06.svg"}]}, {"name": "monkey", "variants": [{"name": "monkey-01", "index": "01", "path": "icons/monkey/monkey-01.svg"}, {"name": "monkey-02", "index": "02", "path": "icons/monkey/monkey-02.svg"}, {"name": "monkey-03", "index": "03", "path": "icons/monkey/monkey-03.svg"}, {"name": "monkey-04", "index": "04", "path": "icons/monkey/monkey-04.svg"}, {"name": "monkey-05", "index": "05", "path": "icons/monkey/monkey-05.svg"}, {"name": "monkey-06", "index": "06", "path": "icons/monkey/monkey-06.svg"}]}, {"name": "mosquito", "variants": [{"name": "mosquito-01", "index": "01", "path": "icons/mosquito/mosquito-01.svg"}, {"name": "mosquito-02", "index": "02", "path": "icons/mosquito/mosquito-02.svg"}, {"name": "mosquito-03", "index": "03", "path": "icons/mosquito/mosquito-03.svg"}, {"name": "mosquito-04", "index": "04", "path": "icons/mosquito/mosquito-04.svg"}, {"name": "mosquito-05", "index": "05", "path": "icons/mosquito/mosquito-05.svg"}, {"name": "mosquito-06", "index": "06", "path": "icons/mosquito/mosquito-06.svg"}]}, {"name": "mouse", "variants": [{"name": "mouse-01", "index": "01", "path": "icons/mouse/mouse-01.svg"}, {"name": "mouse-02", "index": "02", "path": "icons/mouse/mouse-02.svg"}, {"name": "mouse-03", "index": "03", "path": "icons/mouse/mouse-03.svg"}, {"name": "mouse-04", "index": "04", "path": "icons/mouse/mouse-04.svg"}, {"name": "mouse-05", "index": "05", "path": "icons/mouse/mouse-05.svg"}, {"name": "mouse-06", "index": "06", "path": "icons/mouse/mouse-06.svg"}]}, {"name": "octopus", "variants": [{"name": "octopus-01", "index": "01", "path": "icons/octopus/octopus-01.svg"}, {"name": "octopus-02", "index": "02", "path": "icons/octopus/octopus-02.svg"}, {"name": "octopus-03", "index": "03", "path": "icons/octopus/octopus-03.svg"}, {"name": "octopus-04", "index": "04", "path": "icons/octopus/octopus-04.svg"}, {"name": "octopus-05", "index": "05", "path": "icons/octopus/octopus-05.svg"}, {"name": "octopus-06", "index": "06", "path": "icons/octopus/octopus-06.svg"}]}, {"name": "panda", "variants": [{"name": "panda-01", "index": "01", "path": "icons/panda/panda-01.svg"}, {"name": "panda-02", "index": "02", "path": "icons/panda/panda-02.svg"}, {"name": "panda-03", "index": "03", "path": "icons/panda/panda-03.svg"}, {"name": "panda-04", "index": "04", "path": "icons/panda/panda-04.svg"}, {"name": "panda-05", "index": "05", "path": "icons/panda/panda-05.svg"}, {"name": "panda-06", "index": "06", "path": "icons/panda/panda-06.svg"}]}, {"name": "parrot", "variants": [{"name": "parrot-01", "index": "01", "path": "icons/parrot/parrot-01.svg"}, {"name": "parrot-02", "index": "02", "path": "icons/parrot/parrot-02.svg"}, {"name": "parrot-03", "index": "03", "path": "icons/parrot/parrot-03.svg"}, {"name": "parrot-04", "index": "04", "path": "icons/parrot/parrot-04.svg"}, {"name": "parrot-05", "index": "05", "path": "icons/parrot/parrot-05.svg"}, {"name": "parrot-06", "index": "06", "path": "icons/parrot/parrot-06.svg"}]}, {"name": "polar-bear", "variants": [{"name": "polar-bear-01", "index": "01", "path": "icons/polar-bear/polar-bear-01.svg"}, {"name": "polar-bear-02", "index": "02", "path": "icons/polar-bear/polar-bear-02.svg"}, {"name": "polar-bear-03", "index": "03", "path": "icons/polar-bear/polar-bear-03.svg"}, {"name": "polar-bear-04", "index": "04", "path": "icons/polar-bear/polar-bear-04.svg"}, {"name": "polar-bear-05", "index": "05", "path": "icons/polar-bear/polar-bear-05.svg"}, {"name": "polar-bear-06", "index": "06", "path": "icons/polar-bear/polar-bear-06.svg"}]}, {"name": "rabbit", "variants": [{"name": "rabbit-01", "index": "01", "path": "icons/rabbit/rabbit-01.svg"}, {"name": "rabbit-02", "index": "02", "path": "icons/rabbit/rabbit-02.svg"}, {"name": "rabbit-03", "index": "03", "path": "icons/rabbit/rabbit-03.svg"}, {"name": "rabbit-04", "index": "04", "path": "icons/rabbit/rabbit-04.svg"}, {"name": "rabbit-05", "index": "05", "path": "icons/rabbit/rabbit-05.svg"}, {"name": "rabbit-06", "index": "06", "path": "icons/rabbit/rabbit-06.svg"}]}, {"name": "shark", "variants": [{"name": "shark-01", "index": "01", "path": "icons/shark/shark-01.svg"}, {"name": "shark-02", "index": "02", "path": "icons/shark/shark-02.svg"}, {"name": "shark-03", "index": "03", "path": "icons/shark/shark-03.svg"}, {"name": "shark-04", "index": "04", "path": "icons/shark/shark-04.svg"}, {"name": "shark-05", "index": "05", "path": "icons/shark/shark-05.svg"}, {"name": "shark-06", "index": "06", "path": "icons/shark/shark-06.svg"}]}, {"name": "sheep", "variants": [{"name": "sheep-01", "index": "01", "path": "icons/sheep/sheep-01.svg"}, {"name": "sheep-02", "index": "02", "path": "icons/sheep/sheep-02.svg"}, {"name": "sheep-03", "index": "03", "path": "icons/sheep/sheep-03.svg"}, {"name": "sheep-04", "index": "04", "path": "icons/sheep/sheep-04.svg"}, {"name": "sheep-05", "index": "05", "path": "icons/sheep/sheep-05.svg"}, {"name": "sheep-06", "index": "06", "path": "icons/sheep/sheep-06.svg"}]}, {"name": "snake", "variants": [{"name": "snake-01", "index": "01", "path": "icons/snake/snake-01.svg"}, {"name": "snake-02", "index": "02", "path": "icons/snake/snake-02.svg"}, {"name": "snake-03", "index": "03", "path": "icons/snake/snake-03.svg"}, {"name": "snake-04", "index": "04", "path": "icons/snake/snake-04.svg"}, {"name": "snake-05", "index": "05", "path": "icons/snake/snake-05.svg"}, {"name": "snake-06", "index": "06", "path": "icons/snake/snake-06.svg"}]}, {"name": "spider", "variants": [{"name": "spider-01", "index": "01", "path": "icons/spider/spider-01.svg"}, {"name": "spider-02", "index": "02", "path": "icons/spider/spider-02.svg"}, {"name": "spider-03", "index": "03", "path": "icons/spider/spider-03.svg"}, {"name": "spider-04", "index": "04", "path": "icons/spider/spider-04.svg"}, {"name": "spider-05", "index": "05", "path": "icons/spider/spider-05.svg"}, {"name": "spider-06", "index": "06", "path": "icons/spider/spider-06.svg"}]}, {"name": "tiger", "variants": [{"name": "tiger-01", "index": "01", "path": "icons/tiger/tiger-01.svg"}, {"name": "tiger-02", "index": "02", "path": "icons/tiger/tiger-02.svg"}, {"name": "tiger-03", "index": "03", "path": "icons/tiger/tiger-03.svg"}, {"name": "tiger-04", "index": "04", "path": "icons/tiger/tiger-04.svg"}, {"name": "tiger-05", "index": "05", "path": "icons/tiger/tiger-05.svg"}, {"name": "tiger-06", "index": "06", "path": "icons/tiger/tiger-06.svg"}]}, {"name": "turtle", "variants": [{"name": "turtle-01", "index": "01", "path": "icons/turtle/turtle-01.svg"}, {"name": "turtle-02", "index": "02", "path": "icons/turtle/turtle-02.svg"}, {"name": "turtle-03", "index": "03", "path": "icons/turtle/turtle-03.svg"}, {"name": "turtle-04", "index": "04", "path": "icons/turtle/turtle-04.svg"}, {"name": "turtle-05", "index": "05", "path": "icons/turtle/turtle-05.svg"}, {"name": "turtle-06", "index": "06", "path": "icons/turtle/turtle-06.svg"}]}, {"name": "whale", "variants": [{"name": "whale-01", "index": "01", "path": "icons/whale/whale-01.svg"}, {"name": "whale-02", "index": "02", "path": "icons/whale/whale-02.svg"}, {"name": "whale-03", "index": "03", "path": "icons/whale/whale-03.svg"}, {"name": "whale-04", "index": "04", "path": "icons/whale/whale-04.svg"}, {"name": "whale-05", "index": "05", "path": "icons/whale/whale-05.svg"}, {"name": "whale-06", "index": "06", "path": "icons/whale/whale-06.svg"}]}, {"name": "wolfdog", "variants": [{"name": "wolfdog-01", "index": "01", "path": "icons/wolfdog/wolfdog-01.svg"}, {"name": "wolfdog-02", "index": "02", "path": "icons/wolfdog/wolfdog-02.svg"}, {"name": "wolfdog-03", "index": "03", "path": "icons/wolfdog/wolfdog-03.svg"}, {"name": "wolfdog-04", "index": "04", "path": "icons/wolfdog/wolfdog-04.svg"}, {"name": "wolfdog-05", "index": "05", "path": "icons/wolfdog/wolfdog-05.svg"}, {"name": "wolfdog-06", "index": "06", "path": "icons/wolfdog/wolfdog-06.svg"}]}];
+
+const grid = document.getElementById('grid');
+const stat = document.getElementById('stat');
+const aside = document.getElementById('aside');
+const selbar = document.getElementById('selbar');
+const selcount = document.getElementById('selcount');
+const toastEl = document.getElementById('toast');
+
+const selected = new Set();
+let current = null;
+
+const total = DATA.reduce((n, a) => n + a.variants.length, 0);
+stat.textContent = DATA.length + ' 种动物 · ' + total + ' 个图标';
+
+function el(tag, cls, html) {
+  const node = document.createElement(tag);
+  if (cls) node.className = cls;
+  if (html != null) node.innerHTML = html;
+  return node;
+}
+
+for (const animal of DATA) {
+  const card = el('div', 'card');
+  const head = el('div', 'card-head');
+  head.appendChild(el('span', 'name', animal.name));
+  head.appendChild(el('span', 'count', animal.variants.length + ' 变体'));
+  card.appendChild(head);
+
+  const wrap = el('div', 'variants');
+  for (const v of animal.variants) {
+    const tile = el('button', 'tile');
+    tile.type = 'button';
+    tile.dataset.path = v.path;
+    tile.title = v.path;
+
+    const img = document.createElement('img');
+    img.src = v.path;
+    img.alt = v.name;
+    img.loading = 'lazy';
+    tile.appendChild(img);
+    tile.appendChild(el('span', 'tag', v.index));
+
+    tile.addEventListener('click', () => pick(v, tile));
+    wrap.appendChild(tile);
+  }
+  card.appendChild(wrap);
+  card.dataset.animal = animal.name;
+  grid.appendChild(card);
+}
+
+function pick(v, tile) {
+  current = v;
+  if (selected.has(v.path)) {
+    selected.delete(v.path);
+    tile.classList.remove('selected');
+  } else {
+    selected.add(v.path);
+    tile.classList.add('selected');
+  }
+  renderAside(v);
+  renderSelbar();
+}
+
+function renderAside(v) {
+  aside.className = '';
+  aside.innerHTML = '';
+
+  const preview = el('div', 'preview');
+  const img = document.createElement('img');
+  img.src = v.path;
+  img.alt = v.name;
+  preview.appendChild(img);
+  aside.appendChild(preview);
+
+  const meta = el('div', 'meta');
+  meta.innerHTML =
+    '<div><span class="k">名称 </span>' + v.name + '</div>' +
+    '<div><span class="k">序号 </span>' + v.index + '</div>' +
+    '<div><span class="k">路径 </span>' + v.path + '</div>';
+  aside.appendChild(meta);
+
+  const actions = el('div', 'actions');
+  const copyBtn = el('button', 'primary wide', '复制路径');
+  copyBtn.addEventListener('click', () => copy(v.path, '已复制路径'));
+  const copyTag = el('button', 'wide', '复制 img 标签');
+  copyTag.addEventListener('click', () => copy(
+    '<img src="' + v.path + '" alt="' + v.name + '">',
+    '已复制 img 标签'
+  ));
+  actions.appendChild(copyBtn);
+  actions.appendChild(copyTag);
+  aside.appendChild(actions);
+}
+
+function renderSelbar() {
+  selcount.textContent = selected.size;
+  selbar.classList.toggle('show', selected.size > 0);
+}
+
+document.getElementById('clearall').addEventListener('click', () => {
+  selected.clear();
+  document.querySelectorAll('.tile.selected').forEach(t => t.classList.remove('selected'));
+  renderSelbar();
+});
+
+document.getElementById('copyall').addEventListener('click', () => {
+  copy([...selected].join('\n'), '已复制 ' + selected.size + ' 条路径');
+});
+
+async function copy(text, msg) {
+  try {
+    await navigator.clipboard.writeText(text);
+  } catch (err) {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    ta.remove();
+  }
+  toast(msg);
+}
+
+let toastTimer;
+function toast(msg) {
+  toastEl.textContent = msg;
+  toastEl.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toastEl.classList.remove('show'), 1600);
+}
+
+document.getElementById('q').addEventListener('input', (e) => {
+  const q = e.target.value.trim().toLowerCase();
+  for (const card of grid.children) {
+    const hit = !q || card.dataset.animal.toLowerCase().includes(q);
+    card.classList.toggle('hidden', !hit);
+  }
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    selected.clear();
+    document.querySelectorAll('.tile.selected').forEach(t => t.classList.remove('selected'));
+    renderSelbar();
+  }
+});
+</script>
+</body>
+</html>
