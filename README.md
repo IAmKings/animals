@@ -2,6 +2,122 @@
 
 [![校验](https://github.com/IAmKings/animals/actions/workflows/check.yml/badge.svg)](https://github.com/IAmKings/animals/actions/workflows/check.yml)
 
+单色线条动物图标库：**65 种动物、402 个图标**，每种动物 6 个变体（`snake`、`cicada` 各 12 个）。SVG 是唯一源文件，另附一个可搜索的浏览页，发布在 <https://iamkings.github.io/animals/>。
+
+## 快速开始
+
+```bash
+git clone https://github.com/IAmKings/animals.git
+cd animals
+bash scripts/setup.sh     # 启用中文提交校验钩子，只需一次
+open index.html           # 本地浏览
+```
+
+`setup.sh` 会启用钩子、自检钩子是否真的生效、校验素材组织、检查 PNG 渲染器，最后打印一份汇总。重复执行安全。
+
+## 目录结构
+
+```
+animals/
+├── icons/                 图标源文件
+│   ├── index.json         展示顺序（目录名数组）
+│   └── cat/
+│       ├── cat-01.svg
+│       └── ...
+├── scripts/               校验与生成脚本
+├── .githooks/             版本化钩子
+├── .github/workflows/     CI 与站点发布
+├── index.html             浏览页（生成物，随仓库提交）
+├── styles/                展示材料
+├── SVG/                   素材收件箱（不进入版本库）
+└── README.md
+```
+
+## 新增一种动物
+
+1. 建目录放图标：`icons/<动物名>/<动物名>-01.svg` …… `-06.svg`。整批素材也可以先丢进 `SVG/` 收件箱，见[派生文件与收件箱](#派生文件与收件箱)。
+2. 把动物名加进 [`icons/index.json`](icons/index.json)，决定它在浏览页里的位置。
+3. 在 `scripts/build-gallery.py` 里补两项：`ZH_NAMES` 的中文名、`PINYIN` 的拼音（全拼 + 首字母缩写）。缺任一项生成脚本会直接报错并列出缺失目录，避免出现「图标有了但搜不到」。别名可选，加在 `ALIASES`。
+4. 重新生成浏览页：`python3 scripts/build-gallery.py`。
+5. 本地跑一遍校验：`bash scripts/check-index.sh && bash scripts/check-svg.sh`。
+6. 提交（信息用中文）并推送，CI 会复跑同样的检查，通过后自动更新线上站点。
+
+## 素材规范
+
+```
+icons/<动物名>/<动物名>-<两位序号>.svg
+icons/chicken/chicken-01.svg
+```
+
+- **目录名只用动物名，不带序号。** 图标是分批生成的，各批次的编号会互相重复（`01-chicken`、`01-cat` 并存），用名字做标识才稳定。新增动物直接建 `icons/<动物名>/`，不需要维护计数器。
+- **文件名的前缀必须与所在目录同名**，序号为两位数字。
+- **序号从 `01` 连续排到 `N`**，不能断号、不能重号。`01`–`06` 是同一种动物的 6 个变体；追加变体时继续往下编号（第 7 个就是 `-07`）。
+- **目录是扁平结构**，里面只放 SVG，不套子目录。
+- **展示顺序由 [`icons/index.json`](icons/index.json) 定义**，是一个目录名数组。要调整顺序只改这个文件，不要给目录加序号，也不要依赖目录名的排序结果。
+
+以上规则由 `scripts/check-index.sh` 强制，本地和 CI 都会跑。它检查：索引与磁盘目录是否一一对应、文件名是否为 `<目录名>-两位序号.svg`、前缀是否与所在目录同名、序号是否重复或断号、目录里有没有混进子目录或非 SVG 文件。隐藏文件（`.DS_Store`）和 `.gitignore` 忽略的文件（就地导出的 PNG）不参与检查。
+
+## 浏览页
+
+根目录的 [`index.html`](index.html) 双击即可打开，不需要起服务；线上地址是 <https://iamkings.github.io/animals/>。
+
+- 按 `icons/index.json` 的顺序列出全部动物，每张卡片一行显示该动物的全部变体。
+- 点击图标选中，右侧显示大图、名称与路径，可复制路径或 `<img>` 标签；底部工具条汇总已选内容，`Esc` 清空。
+- 搜索同时支持目录名（`cat`）、中文名（`猫`）、拼音全拼（`mao`）、拼音首字母（`cjl` → 长颈鹿）和别名（`小强` → 蟑螂）。**中英文与别名按包含匹配，拼音按前缀匹配**——拼音做包含匹配会让 `ji` 命中「长颈鹿」（`changjinglu`），前缀匹配才不会。
+
+页面用 `<img>` 引用真实文件，不内联 SVG 内容：页面只有 54 KB，随素材变化自动同步，双击打开也不会因为跨域读不到文件。
+
+素材有增减或改名后重新生成：
+
+```bash
+python3 scripts/build-gallery.py
+```
+
+CI 会跑这个脚本并比对 `index.html` 的差异，忘记重新生成会直接失败。
+
+### 发布
+
+站点由 `gh-pages` 分支根目录发布。`.github/workflows/pages.yml` 在每次推送到 `main` 时重新生成页面、把 `index.html`、`.nojekyll` 和 `icons/` 复制到干净的工作目录，再强推 `gh-pages`，所以线上内容始终跟随仓库。
+
+页面里的资源路径都是相对路径（`icons/<动物名>/<文件>.svg`，不带前导斜杠），放在子路径 `/animals/` 下也能正常加载。`.nojekyll` 用于跳过 Jekyll 处理。
+
+## 脚本
+
+| 脚本 | 用途 | 用法 |
+| --- | --- | --- |
+| `scripts/setup.sh` | 启用钩子 + 环境自检 + 素材校验 | `bash scripts/setup.sh` |
+| `scripts/check-index.sh` | 校验索引、命名、序号连续性 | `bash scripts/check-index.sh` |
+| `scripts/check-svg.sh` | 校验 SVG 语法与安全性 | `bash scripts/check-svg.sh [目录]` |
+| `scripts/check-commits.sh` | 校验提交信息含中文 | `bash scripts/check-commits.sh [区间]` |
+| `scripts/build-gallery.py` | 生成浏览页 `index.html` | `python3 scripts/build-gallery.py` |
+| `scripts/export-png.sh` | 从 SVG 导出 PNG | `bash scripts/export-png.sh [长边] [目录]` |
+
+`check-svg.sh` 检查五项：XML 能否解析、根元素是否为 `<svg>`、是否有 `viewBox`、是否含 `<script>` 或 `on*` 事件属性、是否引用外部 `http(s)` 资源。
+
+`check-commits.sh` 不带参数时只查最近一条提交，推送前建议查整个推送区间：`bash scripts/check-commits.sh origin/main..HEAD`。合并提交会被跳过，因为 git 自动生成的信息无法改写。
+
+## 校验与 CI
+
+推送到 `main` 或提 PR 时，GitHub Actions 会执行 [`.github/workflows/check.yml`](.github/workflows/check.yml)，依次跑：
+
+| 步骤 | 命令 | 失败条件 |
+| --- | --- | --- |
+| 配置环境并自检 | `scripts/setup.sh` | 钩子无法启用或自检不通过 |
+| 校验图标素材组织 | `scripts/check-index.sh` | 索引与目录不一致，或命名、序号不合规 |
+| 校验 SVG 语法 | `scripts/check-svg.sh` | 无法解析、缺 `viewBox`、含脚本或外部引用 |
+| 校验浏览页与素材同步 | `scripts/build-gallery.py` + `git diff` | `index.html` 与素材不同步 |
+| 校验提交信息为中文 | `scripts/check-commits.sh` | 本次推送有提交信息不含中文 |
+
+推送前把这几步在本地跑一遍，可以省一次往返：
+
+```bash
+bash scripts/setup.sh
+bash scripts/check-index.sh
+bash scripts/check-svg.sh
+python3 scripts/build-gallery.py
+bash scripts/check-commits.sh origin/main..HEAD
+```
+
 ## 提交规范
 
 本项目**所有 commit 提交信息必须使用中文**。
@@ -38,25 +154,23 @@
 | `commit-msg` | 提交信息不含中文时直接拒绝提交 |
 | `post-checkout` | 每次 checkout 后校验 `core.hooksPath`，不符则自动改回 `.githooks` |
 
-### 首次克隆需要执行一次
+### 首次克隆必须执行一次
 
 ```bash
 bash scripts/setup.sh
 ```
 
-这个脚本会启用钩子、自检钩子是否真的生效、校验 `icons/index.json` 与目录一致、检查 PNG 渲染器，最后打印一份汇总。重复执行安全。
-
-如果只想配钩子、不做其他检查，等价的手动命令是：
+这一步无法省略。git 只有在 `core.hooksPath` 指向 `.githooks` 之后，才可能找到并执行里面的钩子，所以 `post-checkout` 无法完成自身的首次引导——新克隆时它根本还没被 git 看见。只想配钩子、不做其他检查时，等价的手动命令是：
 
 ```bash
 git config core.hooksPath .githooks
 ```
 
-这一步无法省略。git 只有在 `core.hooksPath` 指向 `.githooks` 之后，才可能找到并执行里面的钩子，所以 `post-checkout` 无法完成自身的首次引导——新克隆时它根本还没被 git 看见。
+### 自愈原理
 
-执行过一次之后，`setup.sh` 会顺手在 `.git/hooks/` 里放两个软链入口。这样即使 `core.hooksPath` 被误清空，git 退回默认的 `.git/hooks`，钩子照样会执行，`post-checkout` 再把配置改回 `.githooks`——自愈靠的是这份入口，不是钩子本身。
+`setup.sh` 会顺手在 `.git/hooks/` 里放两个软链入口。这样即使 `core.hooksPath` 被误清空，git 退回默认的 `.git/hooks`，钩子照样会执行，`post-checkout` 再把配置改回 `.githooks`——自愈靠的是这份入口，不是钩子本身。
 
-两种例外情况无法自愈，需要重新跑一次 `bash scripts/setup.sh`：
+有两种情况无法自愈，需要重新跑一次 `bash scripts/setup.sh`：
 
 - `core.hooksPath` 被指向**另一个存在的目录**，git 只会在那里找钩子，本仓库的入口不会被调用
 - `.git/hooks/` 被整个删掉
@@ -69,100 +183,41 @@ git commit --no-verify -m "提交信息"
 
 跳过的是钩子，不是规范——提交信息仍应使用中文。钩子可以被绕过，CI 会在推送时做同样的检查。
 
-## 持续集成
-
-推送到 `main` 或提 PR 时，GitHub Actions 会执行 [`.github/workflows/check.yml`](.github/workflows/check.yml)，依次跑：
-
-| 步骤 | 脚本 | 失败条件 |
-| --- | --- | --- |
-| 环境配置与钩子自检 | `scripts/setup.sh` | 钩子无法启用或自检不通过 |
-| 素材组织校验 | `scripts/check-index.sh` | 索引与磁盘目录不一致，或文件名不符合命名规则 |
-| SVG 语法校验 | `scripts/check-svg.sh` | SVG 无法解析、缺 `viewBox`、含脚本或外部引用 |
-| 提交信息校验 | `scripts/check-commits.sh` | 本次推送的提交信息不含中文 |
-
-三个脚本都能在本地单独运行，推送前先跑一遍可以省一次往返：
-
-```bash
-bash scripts/setup.sh
-bash scripts/check-index.sh
-bash scripts/check-svg.sh
-bash scripts/check-commits.sh origin/main..HEAD
-```
-
-合并提交（有多个父提交）会被跳过，因为 git 自动生成的信息无法改写。
-
-## 图标素材
-
-`icons/` 下 65 个目录，每个目录 6 个 SVG（`snake` 与 `cicada` 各 12 个，因为新增素材与原有风格不同，按变体追加）。**SVG 是唯一源文件。**
-
-命名规则：
-
-```
-icons/<动物名>/<动物名>-<两位序号>.svg
-icons/chicken/chicken-01.svg
-```
-
-目录名只用动物名，**不带序号**——图标是分批生成的，各批次的编号会互相重复，用名字做标识才稳定。新增动物时直接建 `icons/<动物名>/` 即可，不需要维护任何计数器。
-
-同一动物内 `01`–`06` 的序号表示 6 个变体；后续追加的变体继续往下编号。
-
-以上规则由 `scripts/check-index.sh` 强制，本地和 CI 都会跑。它检查：索引与磁盘目录是否一一对应、文件名是否为 `<目录名>-两位序号.svg`、前缀是否与所在目录同名、同一目录内序号是否重复或断号（必须从 `01` 连续排到 `N`）、目录里有没有混进子目录或非 SVG 文件。隐藏文件（`.DS_Store`）和 `.gitignore` 忽略的文件（就地导出的 PNG）不参与检查。
-
-展示顺序由 [`icons/index.json`](icons/index.json) 定义，是一个目录名数组，目前按字母序排列。要调整顺序只改这个文件，不要给目录加序号，也不要用目录名的排序结果当展示顺序：
-
-```json
-["ant", "ape", "bee", "cat", "chicken", "cow", "crocodile", ...]
-```
-
-新增动物时，记得同时把名字加进 `icons/index.json`。
-
-## 浏览页
-
-根目录的 [`index.html`](index.html) 是素材浏览页，双击即可打开，不需要起服务；也发布在 <https://iamkings.github.io/animals/>。左侧按 `icons/index.json` 的顺序列出全部动物，每张卡片一行显示该动物的全部变体；点击图标会选中并在右侧显示大图和路径，可以复制路径或 `<img>` 标签，底部工具条汇总已选内容。搜索框支持中英文与拼音：可以按目录名（`cat`）、中文名（`猫`）、拼音全拼（`mao`）、拼音首字母（`cjl` → 长颈鹿）或别名（`小强` → 蟑螂）过滤。拼音按前缀匹配，中文名与目录名按包含匹配。
-
-页面用 `<img>` 引用真实文件，不内联 SVG 内容，所以看到的就是 `icons/` 里的文件本身。素材有增减或改名后，重新生成一次：
-
-```bash
-python3 scripts/build-gallery.py
-```
-
-CI 会跑这个脚本并比对结果，忘记重新生成会失败。
-
-新增动物时要在 `scripts/build-gallery.py` 里补两条：`ZH_NAMES` 的中文名和 `PINYIN` 的拼音（全拼 + 首字母缩写），缺任一项生成脚本都会直接报错并列出缺失的目录——避免出现「图标有了但搜不到」。别名可选，加在 `ALIASES` 里。
-
-页面里的资源路径都是相对路径（`icons/<动物名>/<文件>.svg`，不带前导斜杠），所以放在 GitHub Pages 的子路径 `/animals/` 下也能正常加载。站点由 `gh-pages` 分支根目录发布，`.github/workflows/pages.yml` 在每次推送到 `main` 时重新生成页面并强推该分支，所以线上内容始终跟随仓库。`.nojekyll` 用于跳过 Jekyll 处理。
-
 ## 性能与规模
 
-当前 65 种动物、402 个图标，整页约 5 屏高，`loading="lazy"` 实际上会加载全部图标——Chrome 的预取距离覆盖了整页。实测：传输 743 KB，暖缓存 0.5 秒，冷缓存约 9 秒。
+当前 65 种动物、402 个图标。实测：`index.html` 54 KB，图标原始合计 2.8 MB、gzip 后约 1.3 MB（单个平均 3.3 KB），DOM 节点 1624 个，整页约 5.5 屏高。暖缓存下全部 402 个图标就绪约 0.2 秒。
 
-规模增长时的主要压力是**请求数**（每个图标一个独立文件），不是 DOM 节点：
+`loading="lazy"` 在这里几乎不起作用——Chrome 的预取距离覆盖了整页，滚动和首屏一样都会把图标全部加载。规模增长时的主要压力是**请求数**（每个图标一个独立文件），不是 DOM 节点：
 
-| 动物数 | 图标数 | 传输体积 | 请求数 | DOM 节点 |
+| 动物数 | 图标数 | 传输体积（gzip） | 请求数 | DOM 节点 |
 |---:|---:|---:|---:|---:|
-| 37 | 222 | 743 KB | 222 | 916 |
-| 60 | 360 | 1.2 MB | 360 | 1,485 |
-| 100 | 600 | 2.0 MB | 600 | 2,476 |
-| 200 | 1,200 | 4.0 MB | 1,200 | 4,951 |
+| 65 | 402 | 1.3 MB | 402 | 1,624（实测） |
+| 100 | 600 | 1.9 MB | 600 | 约 2,400 |
+| 150 | 900 | 2.9 MB | 900 | 约 3,600 |
+| 200 | 1,200 | 3.9 MB | 1,200 | 约 4,800 |
 
 **扩展约定**：动物数接近 60 时再引入分组折叠（按首字母或类别），首屏只渲染展开的那一组；150 种以上再考虑虚拟滚动或把变体合并成 sprite。在此之前保持一次性加载——搜索是这个页面的主入口，分页会把搜索结果切碎。
 
-## 素材投放目录
+## 派生文件与收件箱
 
-根目录的 `SVG/` 是原始素材的暂存区，**不进入版本库**（`.gitignore` 里有 `/SVG/`）。新一批图标放进去后，整理方式是把每个 `SVG/<批次号>-<动物名>/` 里的文件复制成 `icons/<动物名>/<动物名>-<序号>.svg`，去掉批次号前缀，再更新 `icons/index.json`。
+### PNG 导出
 
-`SVG/` 只是收件箱，`icons/` 才是唯一的源。整理完 `SVG/` 可以随时删掉，不影响仓库内容。
-
-PNG 属于派生产物，**不纳入版本控制**（已在 `.gitignore` 中排除 `icons/**/*.png`）。需要时运行脚本生成：
+PNG 属于派生产物，**不纳入版本控制**（`.gitignore` 里排除了 `icons/**/*.png`）。需要时运行脚本生成：
 
 ```bash
-scripts/export-png.sh              # 全部导出，长边 1024px
-scripts/export-png.sh 512          # 指定长边尺寸
-scripts/export-png.sh 1024 cow     # 只导出某个目录
+bash scripts/export-png.sh              # 全部导出，长边 1024px
+bash scripts/export-png.sh 512          # 指定长边尺寸
+bash scripts/export-png.sh 1024 cow     # 只导出某个目录
 ```
 
-导出前会先校验 `icons/index.json` 与磁盘目录是否一一对应。发现「磁盘有但 index 未收录」「index 有但磁盘不存在」「index 中重复」中任一情况时报错退出，避免拿着过期的顺序清单去渲染。确实需要跳过校验时加 `SKIP_INDEX_CHECK=1`。
+导出前会先校验 `icons/index.json` 与磁盘目录是否一一对应，发现「磁盘有但 index 未收录」「index 有但磁盘不存在」「index 中重复」时直接报错退出，避免拿着过期的顺序清单去渲染。确实需要跳过校验时加 `SKIP_INDEX_CHECK=1`。
 
-默认用 ImageMagick 内置渲染器，足以应付单路径图标；若安装了 `rsvg-convert` 会自动优先使用。SVG 含渐变、滤镜、遮罩等复杂特性时，请先 `brew install librsvg`，否则内置渲染器会失真。
+默认用 ImageMagick 内置渲染器，足以应付单路径图标；若装了 `rsvg-convert` 会自动优先使用。SVG 含渐变、滤镜、遮罩等复杂特性时请先 `brew install librsvg`，否则内置渲染器会失真。
+
+### 素材收件箱
+
+根目录的 `SVG/` 是原始素材的暂存区，**不进入版本库**（`.gitignore` 里有 `/SVG/`）。新一批图标放进去后，把每个 `SVG/<批次号>-<动物名>/` 里的文件复制成 `icons/<动物名>/<动物名>-<序号>.svg`（去掉批次号前缀），再按[新增一种动物](#新增一种动物)的步骤更新索引、映射和浏览页。
+
+`SVG/` 只是收件箱，`icons/` 才是唯一的源。整理完 `SVG/` 可以随时删掉，不影响仓库内容。
 
 `styles/` 下的 4 张 JPG 是展示材料，不是派生产物，正常随仓库保存。
