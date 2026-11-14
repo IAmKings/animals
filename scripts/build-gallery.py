@@ -83,7 +83,21 @@ ZH_NAMES = {
     "snail": "蜗牛",
     "sparrow": "麻雀",
     "squirrel": "松鼠",
-    "totoro": "龙猫",
+    "totoro": "龙猫",    "camel": "骆驼",
+    "electric-eel": "电鳗",
+    "hedgehog": "刺猬",
+    "hippo": "河马",
+    "hummingbird": "蜂鸟",
+    "kangaroo": "袋鼠",
+    "pangolin": "穿山甲",
+    "pig": "猪",
+    "reindeer": "驯鹿",
+    "sea-slug": "海蛞蝓",
+    "sea-turtle": "海龟",
+    "seahorse": "海马",
+    "sloth": "树懒",
+    "squid": "鱿鱼",
+    "zebra-finch": "斑胸草雀",
 }
 
 # 额外的中文别名，用来覆盖口语说法（搜「小强」也能找到蟑螂）。
@@ -144,7 +158,13 @@ ALIASES = {
     "snail": ["小蜗牛"],
     "sparrow": ["家雀"],
     "squirrel": ["小松鼠"],
-    "totoro": ["豆豆龙", "托托罗"],
+    "totoro": ["豆豆龙", "托托罗"],    "kangaroo": ["小袋鼠"],
+    "pangolin": ["鲮鲤"],
+    "pig": ["小猪"],
+    "sea-slug": ["海兔"],
+    "sea-turtle": ["绿海龟"],
+    "sloth": ["树獭"],
+    "zebra-finch": ["斑马雀"],
 }
 
 # 目录名 → 拼音。每项是「全拼 + 首字母缩写」，搜索时都能命中。
@@ -213,7 +233,21 @@ PINYIN = {
     "snail": ["woniu", "wn"],
     "sparrow": ["maque", "mq"],
     "squirrel": ["songshu", "ss"],
-    "totoro": ["longmao", "lm"],
+    "totoro": ["longmao", "lm"],    "camel": ["luotuo", "lt"],
+    "electric-eel": ["dianman", "dm"],
+    "hedgehog": ["ciwei", "cw"],
+    "hippo": ["hema", "hm"],
+    "hummingbird": ["fengniao", "fn"],
+    "kangaroo": ["daishu", "ds"],
+    "pangolin": ["chuanshanjia", "csj"],
+    "pig": ["zhu", "z"],
+    "reindeer": ["xunlu", "xl"],
+    "sea-slug": ["haikuoyu", "hky"],
+    "sea-turtle": ["haigui", "hg"],
+    "seahorse": ["haima", "hm"],
+    "sloth": ["shulan", "sl"],
+    "squid": ["youyu", "yy"],
+    "zebra-finch": ["banxiongcaoque", "bxcq"],
 }
 
 # 页面图标：优先用 cat-01，缺失时退回任意一个图标。
