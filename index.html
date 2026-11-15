@@ -130,6 +130,16 @@
   }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
+  .pager {
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    padding: 4px 0 56px; flex-wrap: wrap;
+  }
+  .pager button { min-width: 34px; padding: 6px 9px; font-variant-numeric: tabular-nums; }
+  .pager button.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .pager button:disabled { opacity: .35; cursor: default; }
+  .pager button:disabled:hover { background: var(--surface); }
+  .pager .info { color: var(--muted); font-size: 12.5px; margin-left: 8px; }
+
   .hidden { display: none !important; }
 
   @media (max-width: 900px) {
@@ -153,7 +163,15 @@
 </header>
 
 <div class="layout">
-  <main><div class="grid" id="grid"></div></main>
+  <main>
+    <div class="grid" id="grid"></div>
+    <nav class="pager" id="pager">
+      <button id="prev" type="button">上一页</button>
+      <span id="pages" style="display:contents"></span>
+      <button id="next" type="button">下一页</button>
+      <span class="info" id="pageinfo"></span>
+    </nav>
+  </main>
   <aside class="empty" id="aside">点击任意图标查看详情</aside>
 </div>
 
@@ -304,16 +322,66 @@ function toast(msg) {
   toastTimer = setTimeout(() => toastEl.classList.remove('show'), 1600);
 }
 
-document.getElementById('q').addEventListener('input', (e) => {
-  const q = e.target.value.trim().toLowerCase();
-  for (const card of grid.children) {
-    // 中文名与目录名按包含匹配；拼音按前缀匹配，避免 ji 命中「长颈鹿」
-    const hit = !q ||
-      card.dataset.search.includes(q) ||
-      card.dataset.pinyin.split(' ').some((p) => p && p.startsWith(q));
-    card.classList.toggle('hidden', !hit);
+const PAGE_SIZE = 24;
+let page = 0;
+const cards = [...grid.children];
+const pageCount = Math.max(1, Math.ceil(cards.length / PAGE_SIZE));
+const pager = document.getElementById('pager');
+const pagesEl = document.getElementById('pages');
+const pageinfo = document.getElementById('pageinfo');
+const prevBtn = document.getElementById('prev');
+const nextBtn = document.getElementById('next');
+
+function query() {
+  return document.getElementById('q').value.trim().toLowerCase();
+}
+
+function isMatch(card, q) {
+  // 中文名与目录名按包含匹配；拼音按前缀匹配，避免 ji 命中「长颈鹿」
+  return !q ||
+    card.dataset.search.includes(q) ||
+    card.dataset.pinyin.split(' ').some((p) => p && p.startsWith(q));
+}
+
+function apply() {
+  const q = query();
+  const searching = q.length > 0;
+  let shown = 0;
+  cards.forEach((card, i) => {
+    const hit = isMatch(card, q);
+    const onPage = i >= page * PAGE_SIZE && i < (page + 1) * PAGE_SIZE;
+    const visible = hit && (searching || onPage);
+    card.classList.toggle('hidden', !visible);
+    if (visible) shown += 1;
+  });
+
+  pager.classList.toggle('hidden', searching);
+  if (searching) {
+    pageinfo.textContent = '搜索到 ' + shown + ' 种';
+    return;
   }
-});
+  pageinfo.textContent = '第 ' + (page + 1) + ' / ' + pageCount + ' 页 · 共 ' + cards.length + ' 种';
+  pagesEl.innerHTML = '';
+  for (let i = 0; i < pageCount; i += 1) {
+    const b = el('button', i === page ? 'active' : '', String(i + 1));
+    b.type = 'button';
+    b.addEventListener('click', () => go(i));
+    pagesEl.appendChild(b);
+  }
+  prevBtn.disabled = page === 0;
+  nextBtn.disabled = page === pageCount - 1;
+}
+
+function go(i) {
+  page = Math.max(0, Math.min(pageCount - 1, i));
+  apply();
+  if (window.scrollY > 0) window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+prevBtn.addEventListener('click', () => go(page - 1));
+nextBtn.addEventListener('click', () => go(page + 1));
+document.getElementById('q').addEventListener('input', apply);
+apply();
 
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
