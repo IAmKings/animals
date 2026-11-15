@@ -366,7 +366,9 @@ TEMPLATE = """<!doctype html>
   .layout { display: flex; align-items: flex-start; gap: 24px; padding: 24px; max-width: 1500px; margin: 0 auto; }
   main { flex: 1; min-width: 0; }
 
-  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); gap: 16px; }
+  /* 多列瀑布流：卡片高度各自独立，不会为了对齐行高被拉长或留白 */
+  .grid { column-width: 310px; column-gap: 16px; }
+  .card { break-inside: avoid; page-break-inside: avoid; margin: 0 0 16px; }
 
   .card {
     background: var(--surface); border: 1px solid var(--line);
