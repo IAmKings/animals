@@ -428,6 +428,13 @@ ALIAS_PINYIN = {
 }
 # END ALIAS_PINYIN
 
+# 替代拼写：pypinyin 只给一种读法，ü 与多音字另有常见写法，手工补充。
+# 值会并进该别名的拼音列表，匹配规则与主拼写相同（前缀匹配）。
+ALIAS_EXTRA = {
+    "绿海龟": ["luhaigui"],
+    "家雀": ["jiaque"],
+}
+
 # 页面图标：优先用 cat-01，缺失时退回任意一个图标。
 FAVICON = "icons/cat/cat-01.svg"
 
@@ -864,6 +871,7 @@ def main():
                 missing_alias_pinyin.append(alias)
                 continue
             alias_pinyin.extend(ap)
+            alias_pinyin.extend(ALIAS_EXTRA.get(alias, []))
 
         variants = []
         for entry in sorted(os.listdir(dir_path)):
@@ -892,6 +900,10 @@ def main():
                 "variants": variants,
             }
         )
+
+    unknown_extra = sorted(set(ALIAS_EXTRA) - {a for v in ALIASES.values() for a in v})
+    if unknown_extra:
+        sys.exit("✖ ALIAS_EXTRA 里有不属于任何动物的别名：" + "、".join(unknown_extra))
 
     problems = []
     if missing_zh:

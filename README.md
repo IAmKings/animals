@@ -39,6 +39,7 @@ animals/
 2. 把动物名加进 [`icons/index.json`](icons/index.json)，决定它在浏览页里的位置。
 3. 在 `scripts/build-gallery.py` 里补两项：`ZH_NAMES` 的中文名、`PINYIN` 的拼音（全拼 + 首字母缩写）。缺任一项生成脚本会直接报错并列出缺失目录，避免出现「图标有了但搜不到」。
    别名可选，加在 `ALIASES`；**加了别名要再跑一次 `python3 scripts/build-pinyin.py`**，它会把别名的拼音写进 `ALIAS_PINYIN`，否则别名只能用中文搜到（`laihama` 搜不到「癞蛤蟆」）。
+   拼写有分歧的（`绿` 的 ü、`雀` 的 què/qiǎo 之类）补进 `ALIAS_EXTRA`，例如 `"绿海龟": ["luhaigui"]`，会并进该别名的拼音列表。
 4. 重新生成浏览页：`python3 scripts/build-gallery.py`。
 5. 本地跑一遍校验：`bash scripts/check-index.sh && bash scripts/check-svg.sh`。
 6. 提交（信息用中文）并推送，CI 会复跑同样的检查，通过后自动更新线上站点。
@@ -99,6 +100,7 @@ CI 会跑这个脚本并比对 `index.html` 的差异，忘记重新生成会直
 `check-commits.sh` 不带参数时只查最近一条提交，推送前建议查整个推送区间：`bash scripts/check-commits.sh origin/main..HEAD`。合并提交会被跳过，因为 git 自动生成的信息无法改写。
 
 `build-pinyin.py` 只在改了别名之后才需要跑：别名拼音查字典得到（用 `pypinyin`），预先算好写进 `build-gallery.py`，CI 就不必安装 `pypinyin`。表格首尾有 `# BEGIN ALIAS_PINYIN` / `# END ALIAS_PINYIN` 标记，脚本按标记整块替换。生成时会先做语法检查，结果不合法就放弃写入。
+`build-pinyin.py` 只写 `ALIASES` 推得出来的标准读音；`ALIAS_EXTRA` 是手写的替代拼写，放在标记外面，脚本不会改动它。两个表都会在生成页面时并进拼音列表，也都有守卫：`ALIAS_PINYIN` 缺条目、`ALIAS_EXTRA` 写了不存在的别名，生成脚本会直接报错。
 
 ## 校验与 CI
 
