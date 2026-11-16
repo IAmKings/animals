@@ -37,7 +37,8 @@ animals/
 
 1. 建目录放图标：`icons/<动物名>/<动物名>-01.svg` …… `-06.svg`。整批素材也可以先丢进 `SVG/` 收件箱，见[派生文件与收件箱](#派生文件与收件箱)。
 2. 把动物名加进 [`icons/index.json`](icons/index.json)，决定它在浏览页里的位置。
-3. 在 `scripts/build-gallery.py` 里补两项：`ZH_NAMES` 的中文名、`PINYIN` 的拼音（全拼 + 首字母缩写）。缺任一项生成脚本会直接报错并列出缺失目录，避免出现「图标有了但搜不到」。别名可选，加在 `ALIASES`。
+3. 在 `scripts/build-gallery.py` 里补两项：`ZH_NAMES` 的中文名、`PINYIN` 的拼音（全拼 + 首字母缩写）。缺任一项生成脚本会直接报错并列出缺失目录，避免出现「图标有了但搜不到」。
+   别名可选，加在 `ALIASES`；**加了别名要再跑一次 `python3 scripts/build-pinyin.py`**，它会把别名的拼音写进 `ALIAS_PINYIN`，否则别名只能用中文搜到（`laihama` 搜不到「癞蛤蟆」）。
 4. 重新生成浏览页：`python3 scripts/build-gallery.py`。
 5. 本地跑一遍校验：`bash scripts/check-index.sh && bash scripts/check-svg.sh`。
 6. 提交（信息用中文）并推送，CI 会复跑同样的检查，通过后自动更新线上站点。
@@ -90,11 +91,14 @@ CI 会跑这个脚本并比对 `index.html` 的差异，忘记重新生成会直
 | `scripts/check-svg.sh` | 校验 SVG 语法与安全性 | `bash scripts/check-svg.sh [目录]` |
 | `scripts/check-commits.sh` | 校验提交信息含中文 | `bash scripts/check-commits.sh [区间]` |
 | `scripts/build-gallery.py` | 生成浏览页 `index.html` | `python3 scripts/build-gallery.py` |
+| `scripts/build-pinyin.py` | 按 `ALIASES` 生成别名拼音表 `ALIAS_PINYIN` | `python3 scripts/build-pinyin.py` |
 | `scripts/export-png.sh` | 从 SVG 导出 PNG | `bash scripts/export-png.sh [长边] [目录]` |
 
 `check-svg.sh` 检查五项：XML 能否解析、根元素是否为 `<svg>`、是否有 `viewBox`、是否含 `<script>` 或 `on*` 事件属性、是否引用外部 `http(s)` 资源。
 
 `check-commits.sh` 不带参数时只查最近一条提交，推送前建议查整个推送区间：`bash scripts/check-commits.sh origin/main..HEAD`。合并提交会被跳过，因为 git 自动生成的信息无法改写。
+
+`build-pinyin.py` 只在改了别名之后才需要跑：别名拼音查字典得到（用 `pypinyin`），预先算好写进 `build-gallery.py`，CI 就不必安装 `pypinyin`。表格首尾有 `# BEGIN ALIAS_PINYIN` / `# END ALIAS_PINYIN` 标记，脚本按标记整块替换。生成时会先做语法检查，结果不合法就放弃写入。
 
 ## 校验与 CI
 

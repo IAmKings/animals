@@ -119,16 +119,19 @@ ZH_NAMES = {
     "termite": "白蚁",
     "tiger": "老虎",
     "toad": "蟾蜍",
-    "totoro": "龙猫",    "camel": "骆驼",
+    "totoro": "龙猫",
+    "camel": "骆驼",
     "turkey": "火鸡",
     "turtle": "乌龟",
     "vulture": "秃鹫",
     "whale": "鲸鱼",
     "wild-boar": "野猪",
-    "wolfdog": "狼狗",    "bear": "熊",
+    "wolfdog": "狼狗",
+    "bear": "熊",
     "woodpecker": "啄木鸟",
     "yangtze-giant-softshell": "斑鳖",
-    "zebra-finch": "斑胸草雀",    "beetle": "甲虫",
+    "zebra-finch": "斑胸草雀",
+    "beetle": "甲虫",
 }
 
 # 额外的中文别名，用来覆盖口语说法（搜「小强」也能找到蟑螂）。
@@ -200,12 +203,15 @@ ALIASES = {
     "tardigrade": ["缓步动物"],
     "tiger": ["虎"],
     "toad": ["癞蛤蟆"],
-    "totoro": ["豆豆龙", "托托罗"],    "kangaroo": ["小袋鼠"],
+    "totoro": ["豆豆龙", "托托罗"],
+    "kangaroo": ["小袋鼠"],
     "turtle": ["龟", "海龟"],
     "whale": ["鲸"],
-    "wolfdog": ["狼", "狼犬"],    "bear": ["小熊"],
+    "wolfdog": ["狼", "狼犬"],
+    "bear": ["小熊"],
     "yangtze-giant-softshell": ["扬子鳖"],
-    "zebra-finch": ["斑马雀"],    "cricket": ["蛐蛐"],
+    "zebra-finch": ["斑马雀"],
+    "cricket": ["蛐蛐"],
 }
 
 # 目录名 → 拼音。每项是「全拼 + 首字母缩写」，搜索时都能命中。
@@ -310,17 +316,117 @@ PINYIN = {
     "termite": ["baiyi", "by"],
     "tiger": ["laohu", "lh"],
     "toad": ["chanchu", "cc"],
-    "totoro": ["longmao", "lm"],    "camel": ["luotuo", "lt"],
+    "totoro": ["longmao", "lm"],
+    "camel": ["luotuo", "lt"],
     "turkey": ["huaji", "hj"],
     "turtle": ["wugui", "wg"],
     "vulture": ["tujiu", "tj"],
     "whale": ["jingyu", "jy"],
     "wild-boar": ["yezhu", "yz"],
-    "wolfdog": ["langgou", "lg"],    "bear": ["xiong", "x"],
+    "wolfdog": ["langgou", "lg"],
+    "bear": ["xiong", "x"],
     "woodpecker": ["zhuomuniao", "zmn"],
     "yangtze-giant-softshell": ["banbie", "bb"],
-    "zebra-finch": ["banxiongcaoque", "bxcq"],    "beetle": ["jiachong", "jc"],
+    "zebra-finch": ["banxiongcaoque", "bxcq"],
+    "beetle": ["jiachong", "jc"],
 }
+
+# BEGIN ALIAS_PINYIN（由 scripts/build-pinyin.py 生成，请勿手改）
+ALIAS_PINYIN = {
+    "三文鱼": ["sanwenyu", "swy"],
+    "兔": ["tu", "t"],
+    "八爪鱼": ["bazhaoyu", "bzy"],
+    "四脚蛇": ["sijiaoshe", "sjs"],
+    "地龙": ["dilong", "dl"],
+    "夜猫子": ["yemaozi", "ymz"],
+    "大熊猫": ["daxiongmao", "dxm"],
+    "大闸蟹": ["dazhaxie", "dzx"],
+    "家雀": ["jiaqiao", "jq"],
+    "小仓鼠": ["xiaocangshu", "xcs"],
+    "小企鹅": ["xiaoqie", "xqe"],
+    "小兔": ["xiaotu", "xt"],
+    "小强": ["xiaoqiang", "xq"],
+    "小松鼠": ["xiaosongshu", "xss"],
+    "小海豚": ["xiaohaitun", "xht"],
+    "小熊": ["xiaoxiong", "xx"],
+    "小狐狸": ["xiaohuli", "xhl"],
+    "小狗": ["xiaogou", "xg"],
+    "小猪": ["xiaozhu", "xz"],
+    "小猫": ["xiaomao", "xm"],
+    "小羊": ["xiaoyang", "xy"],
+    "小老鼠": ["xiaolaoshu", "xls"],
+    "小苍蝇": ["xiaocangying", "xcy"],
+    "小虾": ["xiaoxia", "xx"],
+    "小蚂蚁": ["xiaomayi", "xmy"],
+    "小蚊子": ["xiaowenzi", "xwz"],
+    "小蛇": ["xiaoshe", "xs"],
+    "小蜗牛": ["xiaowoniu", "xwn"],
+    "小蜘蛛": ["xiaozhizhu", "xzz"],
+    "小蜜蜂": ["xiaomifeng", "xmf"],
+    "小蝙蝠": ["xiaobianfu", "xbf"],
+    "小袋鼠": ["xiaodaishu", "xds"],
+    "小鸡": ["xiaoji", "xj"],
+    "托托罗": ["tuotuoluo", "ttl"],
+    "扬子鳖": ["yangzibie", "yzb"],
+    "斑马雀": ["banmaque", "bmq"],
+    "杀人鲸": ["sharenjing", "srj"],
+    "树獭": ["shuta", "st"],
+    "母鸡": ["muji", "mj"],
+    "水虎鱼": ["shuihuyu", "shy"],
+    "河鲀": ["hetun", "ht"],
+    "海兔": ["haitu", "ht"],
+    "海蜇": ["haizhe", "hz"],
+    "海龟": ["haigui", "hg"],
+    "熊": ["xiong", "x"],
+    "犬": ["quan", "q"],
+    "狮": ["shi", "s"],
+    "狼": ["lang", "l"],
+    "狼犬": ["langquan", "lq"],
+    "猩猩": ["xingxing", "xx"],
+    "猫咪": ["maomi", "mm"],
+    "猫熊": ["maoxiong", "mx"],
+    "猴": ["hou", "h"],
+    "田鸡": ["tianji", "tj"],
+    "癞蛤蟆": ["laihama", "lhm"],
+    "白熊": ["baixiong", "bx"],
+    "白鸽": ["baige", "bg"],
+    "百足虫": ["baizuchong", "bzc"],
+    "皮皮虾": ["pipixia", "ppx"],
+    "知了": ["zhiliao", "zl"],
+    "类人猿": ["leirenyuan", "lry"],
+    "绿海龟": ["lvhaigui", "lhg"],
+    "缓步动物": ["huanbudongwu", "hbdw"],
+    "羊": ["yang", "y"],
+    "老鸹": ["laogua", "lg"],
+    "虎": ["hu", "h"],
+    "蚕宝宝": ["canbaobao", "cbb"],
+    "蛐蛐": ["ququ", "qq"],
+    "蛙": ["wa", "w"],
+    "蝇": ["ying", "y"],
+    "蝶": ["die", "d"],
+    "蟒蛇": ["mangshe", "ms"],
+    "蟹": ["xie", "x"],
+    "豆豆龙": ["doudoulong", "ddl"],
+    "象": ["xiang", "x"],
+    "长毛象": ["changmaoxiang", "cmx"],
+    "隼": ["sun", "s"],
+    "霸王龙": ["bawanglong", "bwl"],
+    "骏马": ["junma", "jm"],
+    "鱼狗": ["yugou", "yg"],
+    "鲟鱼": ["xunyu", "xy"],
+    "鲨": ["sha", "s"],
+    "鲮鲤": ["lingli", "ll"],
+    "鲸": ["jing", "j"],
+    "鳄": ["e", "e"],
+    "鸭": ["ya", "y"],
+    "鹦哥": ["yingge", "yg"],
+    "鹿": ["lu", "l"],
+    "黄牛": ["huangniu", "hn"],
+    "鼠": ["shu", "s"],
+    "龙": ["long", "l"],
+    "龟": ["gui", "g"],
+}
+# END ALIAS_PINYIN
 
 # 页面图标：优先用 cat-01，缺失时退回任意一个图标。
 FAVICON = "icons/cat/cat-01.svg"
@@ -736,6 +842,7 @@ def main():
     total = 0
     missing_zh = []
     missing_pinyin = []
+    missing_alias_pinyin = []
     for name in order:
         dir_path = os.path.join(ICONS, name)
         if not os.path.isdir(dir_path):
@@ -750,6 +857,13 @@ def main():
             missing_pinyin.append(name)
             continue
         aliases = ALIASES.get(name, [])
+        alias_pinyin = []
+        for alias in aliases:
+            ap = ALIAS_PINYIN.get(alias)
+            if not ap:
+                missing_alias_pinyin.append(alias)
+                continue
+            alias_pinyin.extend(ap)
 
         variants = []
         for entry in sorted(os.listdir(dir_path)):
@@ -774,7 +888,7 @@ def main():
                 "name": name,
                 "zh": zh,
                 "aliases": aliases,
-                "pinyin": pinyin,
+                "pinyin": pinyin + alias_pinyin,
                 "variants": variants,
             }
         )
@@ -784,6 +898,10 @@ def main():
         problems.append("缺少中文名（ZH_NAMES）：" + "、".join(missing_zh))
     if missing_pinyin:
         problems.append("缺少拼音（PINYIN）：" + "、".join(missing_pinyin))
+    if missing_alias_pinyin:
+        problems.append(
+            "缺少别名拼音（ALIAS_PINYIN）：" + "、".join(sorted(set(missing_alias_pinyin)))
+        )
     if problems:
         sys.exit("✖ 以下目录信息不全，请在对应表中补充：\n  " + "\n  ".join(problems))
 
