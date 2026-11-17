@@ -2,7 +2,7 @@
 
 [![校验](https://github.com/IAmKings/animals/actions/workflows/check.yml/badge.svg)](https://github.com/IAmKings/animals/actions/workflows/check.yml)
 
-单色线条动物图标库：**147 种动物、1026 个图标**，每种动物 6 个变体；`ape`、`beetle`、`butterfly`、`chicken`、`deer`、`dog`、`eagle`、`frog`、`monkey`、`pigeon`、`rhinoceros`、`sea-turtle`、`sheep`、`snake`、`spider`、`squid`、`toad`、`turtle` 各 12 个，`bear`、`cicada`、`whale` 各 18 个。SVG 是唯一源文件，另附一个可搜索的浏览页，发布在 <https://iamkings.github.io/animals/>。
+单色线条动物图标库：**167 种动物、1176 个图标**，每种动物 6 个变体；`beetle`、`centipede`、`chicken`、`deer`、`dog`、`eagle`、`frog`、`lobster`、`monkey`、`pigeon`、`rhinoceros`、`sea-turtle`、`sheep`、`snake`、`spider`、`squid`、`toad`、`turtle` 各 12 个，`ape`、`bear`、`butterfly`、`cicada` 各 18 个，`whale` 24 个。SVG 是唯一源文件，另附一个可搜索的浏览页，发布在 <https://iamkings.github.io/animals/>。
 
 ## 快速开始
 
@@ -191,15 +191,15 @@ git commit --no-verify -m "提交信息"
 
 ## 性能与规模
 
-当前 147 种动物、1026 个图标。浏览页分页展示，**每页 24 种**（两列瀑布流，约 2.3 屏），顶部搜索、底部页码条。
+当前 167 种动物、1176 个图标。浏览页分页展示，**每页 24 种**（两列瀑布流，约 2.3 屏），顶部搜索、底部页码条。
 
-分页只切换可见性，卡片始终留在 DOM 里——翻页、搜索、跨页选中都不会重建节点，已选状态也不会丢。首屏只需加载当前页那 24 种动物（实测 192 个图标，变体多的动物多占一些），其余图标要翻到对应页才发起请求，这是分页带来的主要收益。相比之下 `loading="lazy"` 在单页 9 屏的布局里几乎不起作用，Chrome 的预取距离会把整页图标一次性加载完。
+分页只切换可见性，卡片始终留在 DOM 里——翻页、搜索、跨页选中都不会重建节点，已选状态也不会丢。首屏只需加载当前页那 24 种动物（实测 210 个图标，变体多的动物多占一些），其余图标要翻到对应页才发起请求，这是分页带来的主要收益。相比之下 `loading="lazy"` 在单页 9 屏的布局里几乎不起作用，Chrome 的预取距离会把整页图标一次性加载完。
 
-实测（147 种 / 1026 个）：`index.html` 126 KB（gzip 18 KB），全部图标原始 8.1 MB、gzip 3.7 MB（单个平均 8.1 KB），DOM 节点 4000 个，分页后每页约 2.3 屏高。
+实测（167 种 / 1176 个）：`index.html` 142 KB（gzip 20 KB），全部图标原始 9.5 MB、gzip 4.4 MB（单个平均 8.3 KB），DOM 节点 4570 个，分页后每页约 2.3 屏高。
 
 | 动物数 | 图标数 | 页数 | 单页图标请求 | 全部传输（gzip） |
 |---:|---:|---:|---:|---:|
-| 147 | 1026 | 7 | 192（实测） | 3.7 MB（实测） |
+| 167 | 1176 | 7 | 210（实测） | 4.4 MB（实测） |
 | 150 | 900 | 7 | 约 170 | 3.2 MB |
 | 200 | 1,200 | 9 | 约 170 | 4.3 MB |
 
