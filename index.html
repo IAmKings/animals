@@ -427,6 +427,15 @@ function componentName(v) {
     .join('');
 }
 
+function spriteRef(v) {
+  const dir = v.path.split('/')[1];
+  return 'dist/sprites/' + dir + '.svg#' + basename(v.path);
+}
+
+function useSnippet(v) {
+  return '<svg class="icon" aria-hidden="true"><use href="' + spriteRef(v) + '"/></svg>';
+}
+
 function reactSnippet(v) {
   const u = 'url(/' + v.path + ') center / contain no-repeat';
   return `export function ${componentName(v)}({ size = 24, className = "", ...rest }) {
@@ -587,6 +596,8 @@ function renderAside(v) {
   };
   addBtn('复制路径', () => copy(v.path, '已复制路径'));
   addBtn('复制 img 标签', () => copy('<img src="' + v.path + '" alt="' + v.name + '">', '已复制 img 标签'));
+  addBtn('复制 <use> 片段', () => copy(useSnippet(v), '已复制 <use> 片段'));
+  addBtn('复制 sprite 引用', () => copy(spriteRef(v), '已复制 sprite 引用'));
   addBtn('下载 SVG', () => downloadSvg(v));
   addBtn('复制源码', () => copySource(v), !remote, '本地打开不可用，请用线上站点');
   addBtn('mask 片段', () => copyMask(v));
@@ -594,6 +605,9 @@ function renderAside(v) {
   addBtn('React', () => copy(reactSnippet(v), '已复制 React 组件'));
   addBtn('Vue', () => copy(vueSnippet(v), '已复制 Vue 组件'));
   secAct.appendChild(grid);
+  if (!remote) {
+    secAct.appendChild(el('div', 'hint', '本地双击打开时浏览器不允许跨文件 <use> 引用，sprite 片段请用线上站点或本地起服务预览。'));
+  }
   aside.appendChild(secAct);
 
   const secPng = el('div', 'side-sec');
