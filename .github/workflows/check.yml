@@ -45,6 +45,30 @@ jobs:
           fi
           echo "✔ index.html 与素材一致"
 
+      - name: 校验 dist 与 sprite 生成
+        run: |
+          set -euo pipefail
+          python3 scripts/build-dist.py
+          python3 scripts/build-sprite.py
+
+          n=$(find dist/icons -name '*.svg' | wc -l | tr -d ' ')
+          s=$(find dist/sprites -name '*.svg' | wc -l | tr -d ' ')
+          echo "dist/icons: $n 个，dist/sprites: $s 个"
+
+          if [ "$n" != "1176" ]; then
+            echo "✖ dist/icons 数量应为 1176，实际 $n" >&2
+            exit 1
+          fi
+          if [ "$s" != "167" ]; then
+            echo "✖ dist/sprites 数量应为 167，实际 $s" >&2
+            exit 1
+          fi
+          if grep -rl '#000' dist/icons >/dev/null; then
+            echo "✖ dist/icons 里还有写死的黑色" >&2
+            exit 1
+          fi
+          echo "✔ dist 与 sprite 正常"
+
       - name: 校验提交信息为中文
         run: |
           set -euo pipefail

@@ -54,6 +54,7 @@ icons/chicken/chicken-01.svg
 - **目录名只用动物名，不带序号。** 图标是分批生成的，各批次的编号会互相重复（`01-chicken`、`01-cat` 并存），用名字做标识才稳定。新增动物直接建 `icons/<动物名>/`，不需要维护计数器。
 - **文件名的前缀必须与所在目录同名**，序号为两位数字。
 - **序号从 `01` 连续排到 `N`**，不能断号、不能重号。`01`–`06` 是同一种动物的 6 个变体；追加变体时继续往下编号（第 7 个就是 `-07`）。
+- **画布统一为 `viewBox="0 0 100 100"`**。早期 cat、cow、horse、sheep 用的是 375×390 这类非正方形画布，已用 `transform` 缩放居中到 100×100，内容不拉伸；新素材请直接用正方形画布。
 - **目录是扁平结构**，里面只放 SVG，不套子目录。
 - **展示顺序由 [`icons/index.json`](icons/index.json) 定义**，是一个目录名数组。要调整顺序只改这个文件，不要给目录加序号，也不要依赖目录名的排序结果。
 
@@ -127,6 +128,8 @@ CI 会跑这个脚本并比对 `index.html` 的差异，忘记重新生成会直
 | `scripts/build-gallery.py` | 生成浏览页 `index.html` | `python3 scripts/build-gallery.py` |
 | `scripts/build-pinyin.py` | 按 `ALIASES` 生成别名拼音表 `ALIAS_PINYIN` | `python3 scripts/build-pinyin.py` |
 | `scripts/export-png.sh` | 从 SVG 导出 PNG | `bash scripts/export-png.sh [长边] [目录]` |
+| `scripts/build-dist.py` | 生成 currentColor 版图标到 `dist/icons` | `python3 scripts/build-dist.py` |
+| `scripts/build-sprite.py` | 生成 `dist/sprite.svg` 与按动物拆分的 `dist/sprites/*.svg` | `python3 scripts/build-sprite.py` |
 
 `check-svg.sh` 检查五项：XML 能否解析、根元素是否为 `<svg>`、是否有 `viewBox`、是否含 `<script>` 或 `on*` 事件属性、是否引用外部 `http(s)` 资源。
 
@@ -145,6 +148,7 @@ CI 会跑这个脚本并比对 `index.html` 的差异，忘记重新生成会直
 | 校验图标素材组织 | `scripts/check-index.sh` | 索引与目录不一致，或命名、序号不合规 |
 | 校验 SVG 语法 | `scripts/check-svg.sh` | 无法解析、缺 `viewBox`、含脚本或外部引用 |
 | 校验浏览页与素材同步 | `scripts/build-gallery.py` + `git diff` | `index.html` 与素材不同步 |
+| 校验 dist 与 sprite 生成 | `scripts/build-dist.py` + `scripts/build-sprite.py` | 数量不符或产物里仍有写死的黑色 |
 | 校验提交信息为中文 | `scripts/check-commits.sh` | 本次推送有提交信息不含中文 |
 
 推送前把这几步在本地跑一遍，可以省一次往返：
@@ -255,6 +259,34 @@ bash scripts/export-png.sh 1024 cow     # 只导出某个目录
 导出前会先校验 `icons/index.json` 与磁盘目录是否一一对应，发现「磁盘有但 index 未收录」「index 有但磁盘不存在」「index 中重复」时直接报错退出，避免拿着过期的顺序清单去渲染。确实需要跳过校验时加 `SKIP_INDEX_CHECK=1`。
 
 默认用 ImageMagick 内置渲染器，足以应付单路径图标；若装了 `rsvg-convert` 会自动优先使用。SVG 含渐变、滤镜、遮罩等复杂特性时请先 `brew install librsvg`，否则内置渲染器会失真。
+
+### currentColor 图标与 sprite
+
+源图标统一是 `fill="#000"`，只能当黑色用。`dist/` 里放的是换成 `currentColor` 的版本，颜色跟随外层文字，也能被 CSS 覆盖：
+
+```html
+<!-- 法一：直接用文件，颜色由 CSS 决定 -->
+<img src="dist/icons/cat/cat-01.svg" class="icon">
+<svg class="icon"><use href="dist/sprites/cat.svg#cat-01"/></svg>
+```
+
+```css
+.icon { color: #2f6f4e; width: 24px; height: 24px; }
+```
+
+`dist/` 有两个层次：
+
+| 路径 | 内容 | 体积 |
+| --- | --- | --- |
+| `dist/icons/<动物名>/` | 1176 个 currentColor 图标，去掉了 `width`/`height`，只用 `viewBox` | 约 9.5 MB |
+| `dist/sprites/<动物名>.svg` | 每个动物一个 sprite，`<symbol id="cat-01">` 可直接 `<use>` | 单个 20–40 KB |
+| `dist/sprite.svg` | 全部 1176 个 symbol 合并成一个 | 9.5 MB（gzip 3.9 MB） |
+
+**为什么按动物拆分 sprite**：整份 9.5 MB 谁都不会整包加载，日常只需要一两种动物；按动物拆开后单个文件二十几 KB，引用粒度合适。整包那份留给「一次要很多人」的场景。
+
+`dist/` 是派生产物，**不纳入版本控制**（`.gitignore` 里有 `/dist/`）；浏览页发布时会自动生成并随站点一起提供，线上地址形如 `https://iamkings.github.io/animals/dist/sprites/cat.svg`。
+
+生成顺序是先 `build-dist.py` 再 `build-sprite.py`——sprite 从 `dist/icons` 读。`build-sprite.py` 会给每个 `<symbol>` 补 `fill="currentColor"`，因为部分源文件的填充色写在根 `<svg>` 上，抽成 symbol 会丢。
 
 ### 素材收件箱
 

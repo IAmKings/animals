@@ -45,3 +45,6 @@ icons/**/*.png
 
 # 原始素材投放目录：只作暂存，不进入版本库
 /SVG/
+
+# currentColor 图标与 sprite：由 scripts/build-dist.py、build-sprite.py 生成
+/dist/
