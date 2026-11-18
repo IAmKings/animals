@@ -730,6 +730,47 @@ TEMPLATE = """<!doctype html>
   .pager button:disabled:hover { background: var(--surface); }
   .pager .info { color: var(--muted); font-size: 12.5px; margin-left: 8px; }
 
+  .side-sec { margin-top: 13px; }
+  .side-label {
+    font-size: 10.5px; color: var(--muted); margin-bottom: 6px;
+    letter-spacing: .04em; text-transform: uppercase;
+  }
+  .chips { display: flex; gap: 7px; flex-wrap: wrap; align-items: center; }
+  .chip {
+    width: 21px; height: 21px; border-radius: 50%; padding: 0; flex: none;
+    border: 1px solid var(--line); cursor: pointer; background: #fff;
+  }
+  .chip.on { box-shadow: 0 0 0 2px var(--surface), 0 0 0 3.5px var(--accent); }
+  input.chip { -webkit-appearance: none; appearance: none; overflow: hidden; }
+  input.chip::-webkit-color-swatch-wrapper { padding: 0; }
+  input.chip::-webkit-color-swatch { border: none; }
+  .pill {
+    font-size: 11.5px; padding: 3px 9px; border-radius: 999px;
+    border: 1px solid var(--line); background: var(--surface); cursor: pointer;
+  }
+  .pill.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .preview.dark { background: #17170f; }
+  .preview.checker {
+    background-image:
+      linear-gradient(45deg, #e8e8e2 25%, transparent 25%),
+      linear-gradient(-45deg, #e8e8e2 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, #e8e8e2 75%),
+      linear-gradient(-45deg, transparent 75%, #e8e8e2 75%);
+    background-size: 14px 14px;
+    background-position: 0 0, 0 7px, 7px -7px, -7px 0;
+  }
+  .glyph { flex: none; }
+  .glyph img { width: 100%; height: 100%; display: block; }
+  .ladder { display: flex; align-items: flex-end; gap: 13px; padding: 4px 0 0; }
+  .ladder figure { margin: 0; text-align: center; }
+  .ladder img { display: block; margin: 0 auto 3px; }
+  .ladder figcaption { font-size: 9.5px; color: var(--muted); font-family: var(--mono); }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+  .grid2 button { font-size: 12px; padding: 6px 6px; }
+  .pngrow { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .pngrow button { font-size: 11.5px; padding: 5px 0; }
+  .hint { font-size: 10.5px; color: var(--muted); line-height: 1.65; margin-top: 7px; }
+
   .hidden { display: none !important; }
 
   @media (max-width: 900px) {
@@ -842,35 +883,317 @@ function pick(v, tile) {
   renderSelbar();
 }
 
+/* ---------- 单品操作：下载 / 源码 / 着色 / 尺寸 / 导出 ---------- */
+
+const TONES = [
+  { id: 'black', color: '#111111', label: '黑' },
+  { id: 'white', color: '#ffffff', label: '白' },
+  { id: 'accent', color: '#2f6f4e', label: '主题绿' }
+];
+const SURFACES = [
+  { id: 'light', label: '浅底' },
+  { id: 'dark', label: '深底' },
+  { id: 'checker', label: '透明格' }
+];
+const PNG_SIZES = [64, 128, 256, 512];
+
+const remote = location.protocol !== 'file:';
+const svgCache = new Map();
+let toneId = 'black';
+let toneColor = TONES[0].color;
+let surfaceId = 'light';
+
+function toneValue() {
+  const hit = TONES.find((t) => t.id === toneId);
+  return hit ? hit.color : toneColor;
+}
+
+function maskDecl(path, color) {
+  const u = 'url("' + path + '") center / contain no-repeat';
+  return 'background:' + color + ';-webkit-mask:' + u + ';mask:' + u + ';';
+}
+
+function glyph(v, size) {
+  const box = document.createElement('div');
+  box.className = 'glyph';
+  box.style.width = size + 'px';
+  box.style.height = size + 'px';
+  if (remote) {
+    box.style.cssText += maskDecl(v.path, toneValue());
+  } else {
+    // 本地打开时 mask 不会加载，退化为原图 + 反色
+    const img = document.createElement('img');
+    img.src = v.path;
+    img.alt = v.name;
+    if (toneId === 'white') img.style.filter = 'invert(1)';
+    box.appendChild(img);
+  }
+  return box;
+}
+
+function basename(p) {
+  const f = p.split('/').pop();
+  return f.endsWith('.svg') ? f.slice(0, -4) : f;
+}
+
+function triggerDownload(url, name) {
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = name;
+  a.rel = 'noopener';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
+
+function downloadSvg(v) {
+  triggerDownload(v.path, basename(v.path) + '.svg');
+  toast('已下载 ' + basename(v.path) + '.svg');
+}
+
+async function loadSvg(v) {
+  if (svgCache.has(v.path)) return svgCache.get(v.path);
+  const res = await fetch(v.path);
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  const text = await res.text();
+  svgCache.set(v.path, text);
+  return text;
+}
+
+function needRemote(why) {
+  if (remote) return true;
+  toast(why);
+  return false;
+}
+
+async function copySource(v) {
+  if (!needRemote('本地双击打开无法读取源码，请用线上站点')) return;
+  try {
+    const text = await loadSvg(v);
+    await copy(text, '已复制 SVG 源码（' + text.length + ' 字符）');
+  } catch (e) {
+    toast('读取失败：' + e.message);
+  }
+}
+
+async function copyDataUri(v) {
+  if (!needRemote('本地双击打开无法生成 data URI，请用线上站点')) return;
+  try {
+    const uri = 'data:image/svg+xml,' + encodeURIComponent(await loadSvg(v));
+    await copy(uri, '已复制 data URI（' + (uri.length / 1024).toFixed(1) + ' KB）');
+  } catch (e) {
+    toast('读取失败：' + e.message);
+  }
+}
+
+function maskSnippet(v) {
+  const u = 'url(' + v.path + ') center / contain no-repeat';
+  return `.icon {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  background: currentColor;
+  -webkit-mask: ${u};
+  mask: ${u};
+}`;
+}
+
+function copyMask(v) {
+  copy(maskSnippet(v), '已复制 mask 片段');
+}
+
+function componentName(v) {
+  return 'Icon' + basename(v.path).split('-')
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join('');
+}
+
+function reactSnippet(v) {
+  const u = 'url(/' + v.path + ') center / contain no-repeat';
+  return `export function ${componentName(v)}({ size = 24, className = "", ...rest }) {
+  return (
+    <span
+      {...rest}
+      className={className}
+      style={{
+        display: "inline-block",
+        width: size,
+        height: size,
+        backgroundColor: "currentColor",
+        WebkitMask: "${u}",
+        mask: "${u}",
+      }}
+    />
+  );
+}`;
+}
+
+function vueSnippet(v) {
+  const u = 'url(/' + v.path + ') center / contain no-repeat';
+  const endTag = '</' + 'script>';
+  return `<template>
+  <span class="icon" :style="{ width: size + 'px', height: size + 'px' }" />
+</template>
+
+<script setup>
+defineProps({ size: { type: Number, default: 24 } });
+${endTag}
+
+<style scoped>
+.icon {
+  display: inline-block;
+  background: currentColor;
+  -webkit-mask: ${u};
+  mask: ${u};
+}
+</style>`;
+}
+
+async function exportPng(v, size) {
+  try {
+    const img = new Image();
+    img.src = v.path;
+    await img.decode();
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    // SVG 有 viewBox 且默认 preserveAspectRatio=meet，画进方框会等比留白，不拉伸
+    ctx.drawImage(img, 0, 0, size, size);
+    const blob = await new Promise((res, rej) => {
+      canvas.toBlob((b) => (b ? res(b) : rej(new Error('canvas 为空'))), 'image/png');
+    });
+    const url = URL.createObjectURL(blob);
+    triggerDownload(url, basename(v.path) + '@' + size + '.png');
+    setTimeout(() => URL.revokeObjectURL(url), 6000);
+    toast('已导出 ' + size + '×' + size + ' PNG');
+  } catch (e) {
+    toast(remote ? '导出失败：' + e.message : '本地双击打开无法导出 PNG，请用线上站点');
+  }
+}
+
 function renderAside(v) {
   aside.className = '';
   aside.innerHTML = '';
 
-  const preview = el('div', 'preview');
-  const img = document.createElement('img');
-  img.src = v.path;
-  img.alt = v.name;
-  preview.appendChild(img);
+  const preview = el('div', 'preview' + (surfaceId === 'dark' ? ' dark' : surfaceId === 'checker' ? ' checker' : ''));
+  preview.appendChild(glyph(v, 132));
   aside.appendChild(preview);
 
+  const secColor = el('div', 'side-sec');
+  secColor.appendChild(el('div', 'side-label', '前景色'));
+  const chips = el('div', 'chips');
+  for (const t of TONES) {
+    const b = el('button', 'chip' + (t.id === toneId ? ' on' : ''));
+    b.type = 'button';
+    b.style.background = t.color;
+    const disabled = !remote && t.id !== 'black' && t.id !== 'white';
+    b.disabled = disabled;
+    b.title = disabled ? t.label + '（本地打开不可用）' : t.label;
+    b.addEventListener('click', () => {
+      toneId = t.id;
+      toneColor = t.color;
+      renderAside(v);
+    });
+    chips.appendChild(b);
+  }
+  const custom = el('input', 'chip' + (toneId === 'custom' ? ' on' : ''));
+  custom.type = 'color';
+  custom.value = toneId === 'custom' ? toneColor : '#7a7a72';
+  custom.title = remote ? '自定义颜色' : '自定义颜色（本地打开不可用）';
+  custom.disabled = !remote;
+  custom.addEventListener('input', () => {
+    toneId = 'custom';
+    toneColor = custom.value;
+    renderAside(v);
+  });
+  chips.appendChild(custom);
+  secColor.appendChild(chips);
+
+  const surfaces = el('div', 'chips');
+  surfaces.style.marginTop = '7px';
+  for (const s of SURFACES) {
+    const b = el('button', 'pill' + (s.id === surfaceId ? ' on' : ''));
+    b.type = 'button';
+    b.textContent = s.label;
+    b.addEventListener('click', () => {
+      surfaceId = s.id;
+      renderAside(v);
+    });
+    surfaces.appendChild(b);
+  }
+  secColor.appendChild(surfaces);
+  aside.appendChild(secColor);
+
+  const secSize = el('div', 'side-sec');
+  secSize.appendChild(el('div', 'side-label', '尺寸预览'));
+  const ladder = el('div', 'ladder');
+  for (const s of [16, 24, 32, 48, 64]) {
+    const fig = document.createElement('figure');
+    const im = document.createElement('img');
+    im.src = v.path;
+    im.alt = v.name;
+    im.width = s;
+    im.height = s;
+    const cap = document.createElement('figcaption');
+    cap.textContent = s;
+    fig.appendChild(im);
+    fig.appendChild(cap);
+    ladder.appendChild(fig);
+  }
+  secSize.appendChild(ladder);
+  aside.appendChild(secSize);
+
   const meta = el('div', 'meta');
+  meta.style.marginTop = '12px';
   meta.innerHTML =
     '<div><span class="k">名称 </span>' + v.zh + '（' + v.name + '）</div>' +
     '<div><span class="k">序号 </span>' + v.index + '</div>' +
     '<div><span class="k">路径 </span>' + v.path + '</div>';
   aside.appendChild(meta);
 
-  const actions = el('div', 'actions');
-  const copyBtn = el('button', 'primary wide', '复制路径');
-  copyBtn.addEventListener('click', () => copy(v.path, '已复制路径'));
-  const copyTag = el('button', 'wide', '复制 img 标签');
-  copyTag.addEventListener('click', () => copy(
-    '<img src="' + v.path + '" alt="' + v.name + '">',
-    '已复制 img 标签'
-  ));
-  actions.appendChild(copyBtn);
-  actions.appendChild(copyTag);
-  aside.appendChild(actions);
+  const secAct = el('div', 'side-sec');
+  secAct.appendChild(el('div', 'side-label', '复制 / 下载'));
+  const grid = el('div', 'grid2');
+  const addBtn = (text, fn, disabled, title) => {
+    const b = el('button', '');
+    b.type = 'button';
+    b.textContent = text;
+    if (disabled) {
+      b.disabled = true;
+      b.title = title || '';
+    }
+    b.addEventListener('click', fn);
+    grid.appendChild(b);
+  };
+  addBtn('复制路径', () => copy(v.path, '已复制路径'));
+  addBtn('复制 img 标签', () => copy('<img src="' + v.path + '" alt="' + v.name + '">', '已复制 img 标签'));
+  addBtn('下载 SVG', () => downloadSvg(v));
+  addBtn('复制源码', () => copySource(v), !remote, '本地打开不可用，请用线上站点');
+  addBtn('mask 片段', () => copyMask(v));
+  addBtn('data URI', () => copyDataUri(v), !remote, '本地打开不可用，请用线上站点');
+  addBtn('React', () => copy(reactSnippet(v), '已复制 React 组件'));
+  addBtn('Vue', () => copy(vueSnippet(v), '已复制 Vue 组件'));
+  secAct.appendChild(grid);
+  aside.appendChild(secAct);
+
+  const secPng = el('div', 'side-sec');
+  secPng.appendChild(el('div', 'side-label', '导出 PNG'));
+  const prow = el('div', 'pngrow');
+  for (const s of PNG_SIZES) {
+    const b = el('button', '');
+    b.type = 'button';
+    b.textContent = s;
+    b.title = '导出 ' + s + '×' + s + ' 透明 PNG';
+    b.addEventListener('click', () => exportPng(v, s));
+    prow.appendChild(b);
+  }
+  secPng.appendChild(prow);
+  if (!remote) {
+    secPng.appendChild(el('div', 'hint', '本地双击打开时浏览器会阻止 canvas 导出，请用线上站点。'));
+  }
+  aside.appendChild(secPng);
 }
 
 function renderSelbar() {
