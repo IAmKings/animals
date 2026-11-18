@@ -1365,7 +1365,7 @@ async function downloadZip() {
   toast('打包中 0 / ' + paths.length);
   let done = 0;
   try {
-    const entries = await mapLimit(paths, 6, async (path) => {
+    const entries = await mapLimit(paths, 10, async (path) => {
       const res = await fetch(path);
       if (!res.ok) throw new Error(path + ' 读取失败（HTTP ' + res.status + '）');
       const bytes = new Uint8Array(await res.arrayBuffer());
