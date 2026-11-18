@@ -120,6 +120,8 @@
     opacity: 0; pointer-events: none; transition: opacity .15s, transform .15s;
   }
   .selbar.show { opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(0); }
+  .selbar { flex-wrap: wrap; justify-content: center; max-width: calc(100vw - 40px); }
+  .pager button.ghost { margin-left: 10px; }
   .selbar .n { font-variant-numeric: tabular-nums; }
   .selbar button { background: transparent; border-color: rgba(255,255,255,.28); color: #fff; padding: 5px 11px; }
   .selbar button:hover { background: rgba(255,255,255,.12); }
@@ -212,6 +214,7 @@
       <button id="prev" type="button">上一页</button>
       <span id="pages" style="display:contents"></span>
       <button id="next" type="button">下一页</button>
+      <button id="selectpage" type="button" class="ghost">全选本页</button>
       <span class="info" id="pageinfo"></span>
     </nav>
   </main>
@@ -221,6 +224,9 @@
 <div class="selbar" id="selbar">
   <span>已选 <span class="n" id="selcount">0</span> 个</span>
   <button id="copyall">复制全部路径</button>
+  <button id="zipall">下载 ZIP</button>
+  <button id="csvall">清单 CSV</button>
+  <button id="jsonall">清单 JSON</button>
   <button id="clearall">清空</button>
 </div>
 
@@ -611,7 +617,220 @@ function renderAside(v) {
 function renderSelbar() {
   selcount.textContent = selected.size;
   selbar.classList.toggle('show', selected.size > 0);
+  if (typeof syncSelectPage === 'function') syncSelectPage();
 }
+
+/* ---------- 批量操作：全选本页 / ZIP / 清单 ---------- */
+
+const META = new Map();
+for (const animal of DATA) for (const v of animal.variants) META.set(v.path, Object.assign({ animal: animal.name }, v));
+
+function selectPageBtn() {
+  return document.getElementById('selectpage');
+}
+
+function pageTiles() {
+  return [...grid.querySelectorAll('.card:not(.hidden) .tile')];
+}
+
+function syncSelectPage() {
+  const btn = selectPageBtn();
+  if (!btn) return;
+  const paths = pageTiles().map((t) => t.dataset.path);
+  const all = paths.length > 0 && paths.every((p) => selected.has(p));
+  btn.textContent = all ? '取消本页' : '全选本页';
+  btn.classList.toggle('active', all);
+}
+
+selectPageBtn().addEventListener('click', () => {
+  const tiles = pageTiles();
+  const paths = tiles.map((t) => t.dataset.path);
+  const all = paths.length > 0 && paths.every((p) => selected.has(p));
+  for (const t of tiles) {
+    const p = t.dataset.path;
+    if (all) {
+      selected.delete(p);
+      t.classList.remove('selected');
+    } else {
+      selected.add(p);
+      t.classList.add('selected');
+    }
+  }
+  renderSelbar();
+  toast((all ? '已取消本页 ' : '已选中本页 ') + paths.length + ' 个图标');
+});
+
+/* CRC32 与最小 ZIP 写入：store 与 deflate 两种方式，不依赖第三方库 */
+
+const CRC_TABLE = new Uint32Array(256).map((_, n) => {
+  let c = n;
+  for (let k = 0; k < 8; k += 1) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+  return c >>> 0;
+});
+
+function crc32(bytes) {
+  let c = 0xffffffff;
+  for (let i = 0; i < bytes.length; i += 1) c = CRC_TABLE[(c ^ bytes[i]) & 0xff] ^ (c >>> 8);
+  return (c ^ 0xffffffff) >>> 0;
+}
+
+async function deflateRaw(bytes) {
+  if (typeof CompressionStream === 'undefined') return null;
+  const stream = new Blob([bytes]).stream().pipeThrough(new CompressionStream('deflate-raw'));
+  return new Uint8Array(await new Response(stream).arrayBuffer());
+}
+
+function dosStamp(d) {
+  const time = ((d.getHours() << 11) | (d.getMinutes() << 5) | ((d.getSeconds() / 2) | 0)) & 0xffff;
+  const date = (((d.getFullYear() - 1980) << 9) | ((d.getMonth() + 1) << 5) | d.getDate()) & 0xffff;
+  return { time, date };
+}
+
+async function makeZip(files) {
+  const enc = new TextEncoder();
+  const { time, date } = dosStamp(new Date());
+  const chunks = [];
+  const central = [];
+  let offset = 0;
+
+  for (const f of files) {
+    const nameBytes = enc.encode(f.name);
+    const raw = f.data;
+    const crc = crc32(raw);
+    let body = await deflateRaw(raw);
+    let method = 8;
+    if (!body || body.length >= raw.length) {
+      body = raw;
+      method = 0;
+    }
+
+    const local = new Uint8Array(30 + nameBytes.length);
+    const lv = new DataView(local.buffer);
+    lv.setUint32(0, 0x04034b50, true);
+    lv.setUint16(4, 20, true);
+    lv.setUint16(6, 0x0800, true);
+    lv.setUint16(8, method, true);
+    lv.setUint16(10, time, true);
+    lv.setUint16(12, date, true);
+    lv.setUint32(14, crc, true);
+    lv.setUint32(18, body.length, true);
+    lv.setUint32(22, raw.length, true);
+    lv.setUint16(26, nameBytes.length, true);
+    lv.setUint16(28, 0, true);
+    local.set(nameBytes, 30);
+
+    const cen = new Uint8Array(46 + nameBytes.length);
+    const cv = new DataView(cen.buffer);
+    cv.setUint32(0, 0x02014b50, true);
+    cv.setUint16(4, 20, true);
+    cv.setUint16(6, 20, true);
+    cv.setUint16(8, 0x0800, true);
+    cv.setUint16(10, method, true);
+    cv.setUint16(12, time, true);
+    cv.setUint16(14, date, true);
+    cv.setUint32(16, crc, true);
+    cv.setUint32(20, body.length, true);
+    cv.setUint32(24, raw.length, true);
+    cv.setUint16(28, nameBytes.length, true);
+    cv.setUint32(42, offset, true);
+    cen.set(nameBytes, 46);
+
+    chunks.push(local, body);
+    central.push(cen);
+    offset += local.length + body.length;
+  }
+
+  const centralSize = central.reduce((n, c) => n + c.length, 0);
+  const eocd = new Uint8Array(22);
+  const ev = new DataView(eocd.buffer);
+  ev.setUint32(0, 0x06054b50, true);
+  ev.setUint16(8, files.length, true);
+  ev.setUint16(10, files.length, true);
+  ev.setUint32(12, centralSize, true);
+  ev.setUint32(16, offset, true);
+  return new Blob([...chunks, ...central, eocd], { type: 'application/zip' });
+}
+
+function manifestRows() {
+  return [...selected].sort().map((p) => META.get(p)).filter(Boolean);
+}
+
+async function mapLimit(items, limit, fn) {
+  const out = new Array(items.length);
+  let next = 0;
+  const worker = async () => {
+    while (next < items.length) {
+      const i = next;
+      next += 1;
+      out[i] = await fn(items[i], i);
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker));
+  return out;
+}
+
+async function downloadZip() {
+  if (!needRemote('本地双击打开无法读取 SVG，请用线上站点打包')) return;
+  const paths = [...selected].sort();
+  if (paths.length === 0) return toast('还没有选中图标');
+
+  toast('打包中 0 / ' + paths.length);
+  let done = 0;
+  try {
+    const entries = await mapLimit(paths, 6, async (path) => {
+      const res = await fetch(path);
+      if (!res.ok) throw new Error(path + ' 读取失败（HTTP ' + res.status + '）');
+      const bytes = new Uint8Array(await res.arrayBuffer());
+      done += 1;
+      if (done % 12 === 0 || done === paths.length) toast('打包中 ' + done + ' / ' + paths.length);
+      return { name: basename(path) + '.svg', data: bytes };
+    });
+
+    const manifest = manifestRows().map((v) => ({ zh: v.zh, animal: v.animal, file: v.name, index: v.index, path: v.path }));
+    entries.push({ name: 'manifest.json', data: new TextEncoder().encode(JSON.stringify(manifest, null, 2) + '\n') });
+
+    const blob = await makeZip(entries);
+    const url = URL.createObjectURL(blob);
+    triggerDownload(url, 'animals-' + paths.length + '.zip');
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+    toast('已打包 ' + paths.length + ' 个图标，' + Math.round(blob.size / 1024) + ' KB');
+  } catch (err) {
+    toast('打包失败：' + err.message);
+  }
+}
+
+function csvCell(value) {
+  const s = String(value == null ? '' : value);
+  return /[",\n]/.test(s) ? '"' + s.split('"').join('""') + '"' : s;
+}
+
+function downloadManifest(kind) {
+  const rows = manifestRows();
+  if (rows.length === 0) return toast('还没有选中图标');
+
+  let blob;
+  let name;
+  if (kind === 'csv') {
+    const lines = ['中文名,目录名,文件名,序号,路径'].concat(
+      rows.map((v) => [v.zh, v.animal, v.name, v.index, v.path].map(csvCell).join(','))
+    );
+    blob = new Blob(['\ufeff' + lines.join('\n') + '\n'], { type: 'text/csv;charset=utf-8' });
+    name = 'animals-' + rows.length + '.csv';
+  } else {
+    const data = rows.map((v) => ({ zh: v.zh, animal: v.animal, file: v.name, index: v.index, path: v.path }));
+    blob = new Blob([JSON.stringify(data, null, 2) + '\n'], { type: 'application/json' });
+    name = 'animals-' + rows.length + '.json';
+  }
+
+  const url = URL.createObjectURL(blob);
+  triggerDownload(url, name);
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
+  toast('已导出 ' + name);
+}
+
+document.getElementById('zipall').addEventListener('click', downloadZip);
+document.getElementById('csvall').addEventListener('click', () => downloadManifest('csv'));
+document.getElementById('jsonall').addEventListener('click', () => downloadManifest('json'));
 
 document.getElementById('clearall').addEventListener('click', () => {
   selected.clear();
@@ -686,6 +905,7 @@ function apply() {
     return;
   }
   pageinfo.textContent = '第 ' + (page + 1) + ' / ' + pageCount + ' 页 · 共 ' + cards.length + ' 种';
+  if (typeof syncSelectPage === 'function') syncSelectPage();
   pagesEl.innerHTML = '';
   for (let i = 0; i < pageCount; i += 1) {
     const b = el('button', i === page ? 'active' : '', String(i + 1));
