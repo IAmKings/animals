@@ -51,16 +51,19 @@ jobs:
           python3 scripts/build-dist.py
           python3 scripts/build-sprite.py
 
+          # 期望值取自源素材，避免每加一批图标就要改数字
+          want_icons=$(find icons -name '*.svg' | wc -l | tr -d ' ')
+          want_sprites=$(find icons -mindepth 1 -maxdepth 1 -type d | wc -l | tr -d ' ')
           n=$(find dist/icons -name '*.svg' | wc -l | tr -d ' ')
           s=$(find dist/sprites -name '*.svg' | wc -l | tr -d ' ')
-          echo "dist/icons: $n 个，dist/sprites: $s 个"
+          echo "dist/icons: $n 个（期望 $want_icons），dist/sprites: $s 个（期望 $want_sprites）"
 
-          if [ "$n" != "1176" ]; then
-            echo "✖ dist/icons 数量应为 1176，实际 $n" >&2
+          if [ "$n" != "$want_icons" ]; then
+            echo "✖ dist/icons 数量与 icons 不一致：$n vs $want_icons" >&2
             exit 1
           fi
-          if [ "$s" != "167" ]; then
-            echo "✖ dist/sprites 数量应为 167，实际 $s" >&2
+          if [ "$s" != "$want_sprites" ]; then
+            echo "✖ dist/sprites 数量与 icons 目录数不一致：$s vs $want_sprites" >&2
             exit 1
           fi
           if grep -rl '#000' dist/icons >/dev/null; then

@@ -156,7 +156,7 @@ CI 会跑这个脚本并比对 `index.html` 的差异，忘记重新生成会直
 | 校验图标素材组织 | `scripts/check-index.sh` | 索引与目录不一致，或命名、序号不合规 |
 | 校验 SVG 语法 | `scripts/check-svg.sh` | 无法解析、缺 `viewBox`、含脚本或外部引用 |
 | 校验浏览页与素材同步 | `scripts/build-gallery.py` + `git diff` | `index.html` 与素材不同步 |
-| 校验 dist 与 sprite 生成 | `scripts/build-dist.py` + `scripts/build-sprite.py` | 数量不符或产物里仍有写死的黑色 |
+| 校验 dist 与 sprite 生成 | `scripts/build-dist.py` + `scripts/build-sprite.py` | 生成数量与 icons 不一致，或产物里仍有写死的黑色 |
 | 校验提交信息为中文 | `scripts/check-commits.sh` | 本次推送有提交信息不含中文 |
 
 推送前把这几步在本地跑一遍，可以省一次往返：
@@ -286,11 +286,11 @@ bash scripts/export-png.sh 1024 cow     # 只导出某个目录
 
 | 路径 | 内容 | 体积 |
 | --- | --- | --- |
-| `dist/icons/<动物名>/` | 1176 个 currentColor 图标，去掉了 `width`/`height`，只用 `viewBox` | 约 9.5 MB |
+| `dist/icons/<动物名>/` | 每个源图标一份 currentColor 版本，去掉了 `width`/`height`，只用 `viewBox` | 约 9.5 MB |
 | `dist/sprites/<动物名>.svg` | 每个动物一个 sprite，`<symbol id="cat-01">` 可直接 `<use>` | 单个 20–40 KB |
-| `dist/sprite.svg` | 全部 1176 个 symbol 合并成一个 | 9.5 MB（gzip 3.9 MB） |
+| `dist/sprite.svg` | 全部 symbol 合并成一个（当前 1236 个） | 9.5 MB（gzip 3.9 MB） |
 
-**为什么按动物拆分 sprite**：整份 9.5 MB 谁都不会整包加载，日常只需要一两种动物；按动物拆开后单个文件二十几 KB，引用粒度合适。整包那份留给「一次要很多人」的场景。
+**为什么按动物拆分 sprite**：整份 10 MB 谁都不会整包加载，日常只需要一两种动物；按动物拆开后单个文件二十几 KB，引用粒度合适。整包那份留给「一次要很多人」的场景。
 
 `dist/` 是派生产物，**不纳入版本控制**（`.gitignore` 里有 `/dist/`）；浏览页发布时会自动生成并随站点一起提供，线上地址形如 `https://iamkings.github.io/animals/dist/sprites/cat.svg`。
 
