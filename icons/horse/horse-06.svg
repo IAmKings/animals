@@ -1,4 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="426" height="427" viewBox="0 0 426 427" fill="#000">
+<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100" fill="#000">
+  <g transform="translate(0.1171 0.0) scale(0.234192)">
   <path id="shape-1" fill-rule="evenodd" d="
       M 254 16.53
       C 243.73 19.27 230.27 30.73 220.87 44.8
@@ -147,4 +148,5 @@
       C 109.93 311.33 122.67 310.73 124.33 299.13
       C 125.87 288.27 121.13 281.47 113.87 284.13
       Z"/>
+</g>
 </svg>
