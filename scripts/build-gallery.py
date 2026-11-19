@@ -1046,6 +1046,17 @@ function useSnippet(v) {
   return '<svg class="icon" aria-hidden="true"><use href="' + spriteRef(v) + '"/></svg>';
 }
 
+// 当前动物的全部变体，用来一次性复制整组
+function groupVariants(v) {
+  const dir = v.path.split('/')[1];
+  const animal = DATA.filter((a) => a.variants.some((x) => x.path.split('/')[1] === dir))[0];
+  return animal ? animal.variants : [v];
+}
+
+function groupSnippet(v) {
+  return groupVariants(v).map(useSnippet).join(String.fromCharCode(10));
+}
+
 function reactSnippet(v) {
   const u = 'url(/' + v.path + ') center / contain no-repeat';
   return `export function ${componentName(v)}({ size = 24, className = "", ...rest }) {
@@ -1208,6 +1219,7 @@ function renderAside(v) {
   addBtn('复制 img 标签', () => copy('<img src="' + v.path + '" alt="' + v.name + '">', '已复制 img 标签'));
   addBtn('复制 <use> 片段', () => copy(useSnippet(v), '已复制 <use> 片段'));
   addBtn('复制 sprite 引用', () => copy(spriteRef(v), '已复制 sprite 引用'));
+  addBtn('复制整组 <use>', () => copy(groupSnippet(v), '已复制整组 ' + groupVariants(v).length + ' 个 <use> 片段'));
   addBtn('下载 SVG', () => downloadSvg(v));
   addBtn('复制源码', () => copySource(v), !remote, '本地打开不可用，请用线上站点');
   addBtn('mask 片段', () => copyMask(v));

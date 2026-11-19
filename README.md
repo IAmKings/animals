@@ -78,7 +78,7 @@ icons/chicken/chicken-01.svg
 | --- | --- |
 | 预览 | 前景色切换（黑 / 白 / 主题绿 / 自定义取色）、底色切换（浅底 / 深底 / 透明格） |
 | 尺寸 | 16 / 24 / 32 / 48 / 64 px 阶梯预览，看小尺寸下是否还认得出 |
-| 复制 / 下载 | 复制路径、复制 `<img>` 标签、复制 `<use>` 片段、复制 sprite 引用、下载原始 SVG、复制 SVG 源码、复制 CSS `mask` 片段、复制 data URI、复制 React 组件、复制 Vue 组件 |
+| 复制 / 下载 | 复制路径、复制 `<img>` 标签、复制 `<use>` 片段、复制 sprite 引用、复制整组 `<use>`（当前动物的全部变体）、下载原始 SVG、复制 SVG 源码、复制 CSS `mask` 片段、复制 data URI、复制 React 组件、复制 Vue 组件 |
 | 导出 PNG | 64 / 128 / 256 / 512 四种尺寸的透明 PNG |
 
 「复制 `<use>` 片段」直接给出可粘贴的整段引用，不用自己拼 id：
@@ -87,7 +87,7 @@ icons/chicken/chicken-01.svg
 <svg class="icon" aria-hidden="true"><use href="dist/sprites/cat.svg#cat-01"/></svg>
 ```
 
-「复制 sprite 引用」只给引用本身（`dist/sprites/cat.svg#cat-01`），已经有自己的 `<svg>` 外层时用它。两者都按 `dist/sprites/<动物名>.svg` 的布局生成，需要先跑一次 `scripts/build-dist.py` 和 `scripts/build-sprite.py`；线上站点已经带好这份产物，`file://` 下浏览器不允许跨文件 `<use>`，此时面板会给出提示。
+「复制 sprite 引用」只给引用本身（`dist/sprites/cat.svg#cat-01`），已经有自己的 `<svg>` 外层时用它；「复制整组 `<use>`」把当前动物的所有变体拼成多行 `<svg>` 片段，一次贴进页面就能看到整组。两者都按 `dist/sprites/<动物名>.svg` 的布局生成，需要先跑一次 `scripts/build-dist.py` 和 `scripts/build-sprite.py`；线上站点已经带好这份产物，`file://` 下浏览器不允许跨文件 `<use>`，此时面板会给出提示。
 
 着色用 CSS `mask` 把 SVG 当模板，`background` 决定颜色，因此同一个文件就能得到任意前景色，仓库里不需要存彩色副本。React 与 Vue 片段同样基于 `mask` + `currentColor`，贴进项目后跟随文字颜色。
 
