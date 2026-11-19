@@ -1221,6 +1221,7 @@ function renderAside(v) {
   addBtn('复制 sprite 引用', () => copy(spriteRef(v), '已复制 sprite 引用'));
   addBtn('复制整组 <use>', () => copy(groupSnippet(v), '已复制整组 ' + groupVariants(v).length + ' 个 <use> 片段'));
   addBtn('下载 SVG', () => downloadSvg(v));
+  addBtn('下载整组 SVG', () => downloadGroupSvg(v), !remote, '本地打开不可用，请用线上站点');
   addBtn('复制源码', () => copySource(v), !remote, '本地打开不可用，请用线上站点');
   addBtn('mask 片段', () => copyMask(v));
   addBtn('data URI', () => copyDataUri(v), !remote, '本地打开不可用，请用线上站点');
@@ -1403,6 +1404,33 @@ async function mapLimit(items, limit, fn) {
   };
   await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker));
   return out;
+}
+
+async function downloadGroupSvg(v) {
+  if (!needRemote('本地双击打开无法读取 SVG，请用线上站点下载整组')) return;
+  const dir = v.path.split('/')[1];
+  const list = groupVariants(v);
+  toast('打包中 0 / ' + list.length);
+
+  let done = 0;
+  try {
+    const entries = await mapLimit(list, 10, async (x) => {
+      const res = await fetch(x.path);
+      if (!res.ok) throw new Error(x.path + ' 读取失败（HTTP ' + res.status + '）');
+      const bytes = new Uint8Array(await res.arrayBuffer());
+      done += 1;
+      toast('打包中 ' + done + ' / ' + list.length);
+      return { name: basename(x.path) + '.svg', data: bytes };
+    });
+
+    const blob = await makeZip(entries);
+    const url = URL.createObjectURL(blob);
+    triggerDownload(url, dir + '-svg-' + list.length + '.zip');
+    toast('已下载整组 ' + list.length + ' 个 SVG');
+    setTimeout(() => URL.revokeObjectURL(url), 10000);
+  } catch (err) {
+    toast('打包失败：' + err.message);
+  }
 }
 
 async function downloadZip() {
