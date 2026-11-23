@@ -2,7 +2,7 @@
 
 [![校验](https://github.com/IAmKings/animals/actions/workflows/check.yml/badge.svg)](https://github.com/IAmKings/animals/actions/workflows/check.yml)
 
-单色线条动物图标库：**230 种动物、1716 个图标**。183 种各 6 个变体；`ant`、`antelope`、`bee`、`beetle`、`caterpillar`、`catfish`、`chicken`、`cricket`、`deer`、`eagle`、`flea`、`frog`、`giant-clam`、`gorilla`、`hammerhead-shark`、`jellyfish`、`kingfisher`、`leech`、`lobster`、`lungfish`、`mammoth`、`monkey`、`ocean-sunfish`、`orca`、`parrot`、`penguin`、`pigeon`、`red-panda`、`rhinoceros`、`sea-turtle`、`seagull`、`sheep`、`snake`、`spider`、`squid`、`tardigrade`、`toad`、`turtle`、`tyrannosaurus`、`wildcat` 各 12 个；`ape`、`butterfly`、`centipede`、`cicada`、`dog` 各 18 个；`bear`、`whale` 各 24 个。SVG 是唯一源文件，另附一个可搜索的浏览页，发布在 <https://iamkings.github.io/animals/>。
+单色线条动物图标库：**246 种动物、1902 个图标**。189 种各 6 个变体；`ant`、`antelope`、`aphid`、`bee`、`caterpillar`、`catfish`、`chicken`、`coral-reef`、`cricket`、`deer`、`eagle`、`elephant`、`flea`、`frog`、`gorilla`、`hammerhead-shark`、`kingfisher`、`leech`、`lizard`、`lobster`、`lungfish`、`mammoth`、`monkey`、`ocean-sunfish`、`opossum`、`orca`、`otter`、`parrot`、`penguin`、`pigeon`、`red-panda`、`reindeer`、`rhinoceros`、`sea-turtle`、`seagull`、`sheep`、`snake`、`spider`、`spiny-lizard`、`squid`、`tardigrade`、`tiger`、`toad`、`turtle`、`tyrannosaurus`、`wildcat` 各 12 个；`ape`、`beetle`、`bird`、`butterfly`、`centipede`、`cicada`、`giant-clam`、`jellyfish` 各 18 个；`bear`、`dog`、`whale` 各 24 个。SVG 是唯一源文件，另附一个可搜索的浏览页，发布在 <https://iamkings.github.io/animals/>。
 
 ## 快速开始
 
@@ -68,7 +68,7 @@ icons/chicken/chicken-01.svg
 - 点击图标选中，底部工具条汇总已选内容，`Esc` 清空。
 - 搜索同时支持目录名（`cat`）、中文名（`猫`）、拼音全拼（`mao`）、拼音首字母（`cjl` → 长颈鹿）和别名（`小强` → 蟑螂）。**中英文与别名按包含匹配，拼音按前缀匹配**——拼音做包含匹配会让 `ji` 命中「长颈鹿」（`changjinglu`），前缀匹配才不会。
 
-页面用 `<img>` 引用真实文件，不内联 SVG 内容：页面 222 KB（gzip 32 KB），随素材变化自动同步，双击打开也不会因为跨域读不到文件。
+页面用 `<img>` 引用真实文件，不内联 SVG 内容：页面 243 KB（gzip 34 KB），随素材变化自动同步，双击打开也不会因为跨域读不到文件。
 
 ### 图标操作面板
 
@@ -101,7 +101,7 @@ icons/chicken/chicken-01.svg
 | 下载 ZIP | 把选中的 SVG 打包成 zip，内部附 `manifest.json`（中文名、目录名、文件名、序号、路径） |
 | 清单 CSV / JSON | 只导出清单，不打包文件；CSV 带 BOM，Excel 打开中文不乱码 |
 
-ZIP 是用浏览器自带的 `CompressionStream('deflate-raw')` 加手写的最小 ZIP 结构生成的，不引第三方库。实测本页 210 个图标打包 815 KB、约 0.5 秒；`unzip -t` 校验通过，四个字段与 CRC 都对。
+ZIP 是用浏览器自带的 `CompressionStream('deflate-raw')` 加手写的最小 ZIP 结构生成的，不引第三方库。实测本页 234 个图标打包 913 KB、约 0.5 秒；`unzip -t` 校验通过，四个字段与 CRC 都对。
 
 ZIP 需要读取文件内容，所以只在 http(s) 下可用；清单导出只用到页面里已有的数据，`file://` 下也能用。
 
@@ -236,21 +236,21 @@ git commit --no-verify -m "提交信息"
 
 ## 性能与规模
 
-当前 230 种动物、1716 个图标，共 10 页。浏览页分页展示，**每页 24 种**（两列瀑布流，约 2.6 屏），顶部搜索、底部页码条。
+当前 246 种动物、1902 个图标，共 11 页。浏览页分页展示，**每页 24 种**（两列瀑布流，约 2.6 屏），顶部搜索、底部页码条。
 
 分页只切换可见性，卡片始终留在 DOM 里——翻页、搜索、跨页选中都不会重建节点，已选状态也不会丢。首屏只需加载当前页那 24 种动物（实测 198 个图标，变体多的动物多占一些），其余图标要翻到对应页才发起请求，这是分页带来的主要收益。相比之下 `loading="lazy"` 在不分页的整页布局（200 多种约 20 多屏）里几乎不起作用，Chrome 的预取距离会把整页图标一次性加载完。
 
-实测（230 种 / 1716 个）：`index.html` 222 KB（gzip 32 KB），全部图标原始 14.4 MB、gzip 6.6 MB（单个平均 8.6 KB），DOM 节点 5806 个，分页后每页约 2.6 屏高（1243×822 视口）。
+实测（246 种 / 1902 个）：`index.html` 243 KB（gzip 34 KB），全部图标原始 16.5 MB、gzip 7.5 MB（单个平均 8.9 KB），DOM 节点 5806 个，分页后每页约 2.6 屏高（1243×822 视口）。
 
 | 动物数 | 图标数 | 页数 | 单页图标请求 | 全部传输（gzip） |
 |---:|---:|---:|---:|---:|
-| 230 | 1716 | 10 | 210（实测） | 6.6 MB（实测） |
-| 250 | 约 1,830 | 11 | 约 200 | 约 7.2 MB |
-| 300 | 约 2,200 | 13 | 约 210 | 约 8.7 MB |
+| 246 | 1902 | 11 | 234（实测） | 7.5 MB（实测） |
+| 280 | 约 2,080 | 12 | 约 235 | 约 8.2 MB |
+| 320 | 约 2,380 | 14 | 约 235 | 约 9.4 MB |
 
 **搜索不分页**：输入关键词时页码条隐藏，匹配结果跨页全部展示，清空后回到原来的页码。分页不会把搜索结果切碎。
 
-卡片高度随变体数各自独立（6 变体比 12 变体矮一截），容器用 CSS 多列排布，列的填充顺序是先左列到底再右列，因此同屏的左右两张卡并不相邻。**扩展约定**：每页 24 种到 300 种左右都还够用（当前 230 种）。超过 300 种再考虑把变体合并成 sprite（请求数从上千降到页面级的几个），或按类别加一层筛选。
+卡片高度随变体数各自独立（6 变体比 12 变体矮一截），容器用 CSS 多列排布，列的填充顺序是先左列到底再右列，因此同屏的左右两张卡并不相邻。**扩展约定**：每页 24 种到 300 种左右都还够用（当前 246 种）。超过 300 种再考虑把变体合并成 sprite（请求数从上千降到页面级的几个），或按类别加一层筛选。
 
 ## 派生文件与收件箱
 
@@ -286,11 +286,11 @@ bash scripts/export-png.sh 1024 cow     # 只导出某个目录
 
 | 路径 | 内容 | 体积 |
 | --- | --- | --- |
-| `dist/icons/<动物名>/` | 每个源图标一份 currentColor 版本，去掉了 `width`/`height`，只用 `viewBox` | 约 14.4 MB |
+| `dist/icons/<动物名>/` | 每个源图标一份 currentColor 版本，去掉了 `width`/`height`，只用 `viewBox` | 约 16.5 MB |
 | `dist/sprites/<动物名>.svg` | 每个动物一个 sprite，`<symbol id="cat-01">` 可直接 `<use>` | 单个 20–60 KB |
-| `dist/sprite.svg` | 全部 symbol 合并成一个（当前 1716 个） | 14.4 MB（gzip 5.9 MB） |
+| `dist/sprite.svg` | 全部 symbol 合并成一个（当前 1902 个） | 16.5 MB（gzip 6.6 MB） |
 
-**为什么按动物拆分 sprite**：整份 14.4 MB 谁都不会整包加载，日常只需要一两种动物；按动物拆开后单个文件二十几 KB，引用粒度合适。整包那份留给「一次要很多人」的场景。
+**为什么按动物拆分 sprite**：整份 16.5 MB 谁都不会整包加载，日常只需要一两种动物；按动物拆开后单个文件二十几 KB，引用粒度合适。整包那份留给「一次要很多人」的场景。
 
 `dist/` 是派生产物，**不纳入版本控制**（`.gitignore` 里有 `/dist/`）；浏览页发布时会自动生成并随站点一起提供，线上地址形如 `https://iamkings.github.io/animals/dist/sprites/cat.svg`。
 
